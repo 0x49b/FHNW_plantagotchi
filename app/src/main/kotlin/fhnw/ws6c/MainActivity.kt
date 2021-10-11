@@ -3,7 +3,7 @@ package fhnw.ws6c
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import fhnw.ws6c.theapp.TheApp
+import fhnw.ws6c.plantagotchi.PlantagotchiApp
 
 
 class MainActivity : ComponentActivity() {
@@ -12,9 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        app = TheApp
-
-
+        app = PlantagotchiApp
         app.initialize(activity = this)
 
         setContent {

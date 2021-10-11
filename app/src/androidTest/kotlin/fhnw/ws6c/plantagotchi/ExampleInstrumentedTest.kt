@@ -1,4 +1,4 @@
-package fhnw.ws6c.theapp
+package fhnw.ws6c.plantagotchi
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
