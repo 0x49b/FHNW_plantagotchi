@@ -66,6 +66,8 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.1.1'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation "androidx.navigation:navigation-compose:2.4.0-alpha10"
+
+    implementation 'com.beust:klaxon:5.5'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
