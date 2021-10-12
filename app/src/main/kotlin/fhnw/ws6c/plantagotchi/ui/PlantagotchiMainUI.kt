@@ -14,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
+import androidx.compose.foundation.layout.Arrangement
 
 
 @Composable
@@ -23,33 +24,17 @@ fun AppUI(model: PlantagotchiModel) {
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Column {
-                Text(
-                    text = title,
-                    style = TextStyle(fontSize = 20.sp)
-                )
-
+            Column(verticalArrangement = Arrangement.SpaceBetween) {
+                Text(text = title,style = TextStyle(fontSize = 35.sp))
                 Text(text = position, style = TextStyle(fontSize = 20.sp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(text = currentWeather, style = TextStyle(fontSize = 20.sp))
-
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(text = nightDay, style = TextStyle(fontSize = 20.sp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(text = "$currentLux lux", style = TextStyle(fontSize = 20.sp))
-
-                Button(onClick = {
-                    // Todo Quick and dirty. Do not do this :-)
-                    position = ""
-                    currentWeather = ""
-                    nightDay = ""
-                    getCurrentWeather()
-                }) {
-                    Text("Get Position, WeatherData and Sunrise/Sunset")
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
+                Spacer(modifier = Modifier.height(40.dp))
                 Text(text = "Last update: ${lastCheck}")
-
-
             }
 
         }

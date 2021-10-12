@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,13 +33,13 @@ import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
-class PlantagotchiModel(val activity: ComponentActivity): SensorEventListener {
+class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(), SensorEventListener {
 
     private var TAG = "PlantagotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var sensorManager: SensorManager = activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private var sensorManager: SensorManager =
+        activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
-
 
 
     var title = "Hello ws6C"
@@ -55,23 +56,27 @@ class PlantagotchiModel(val activity: ComponentActivity): SensorEventListener {
     var currentLux by mutableStateOf(0.0f)
 
     // Todo: Maybe redesign later
-    init{
+    init {
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        fixedRateTimer(name = "plantagotchi-data-load", initialDelay = 0, period = 10000, daemon = true){
+        sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
+        fixedRateTimer(
+            name = "plantagotchi-data-load",
+            initialDelay = 0,
+            period = 10000,
+            daemon = true
+        ) {
             getCurrentWeather()
         }
     }
-
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // braucht es aktuell nicht
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        if(event.sensor.type == Sensor.TYPE_LIGHT){
+        if (event.sensor.type == Sensor.TYPE_LIGHT) {
             currentLux = event.values[0]
-            Log.i(TAG, event.toString())
-            Log.i(TAG, "Current lux: $currentLux")
+            Log.d(TAG, "Current lux: $currentLux")
         }
     }
 
@@ -85,11 +90,11 @@ class PlantagotchiModel(val activity: ComponentActivity): SensorEventListener {
                     val url =
                         URL("https://api.openweathermap.org/data/2.5/weather?lat=${it.latitude}&lon=${it.longitude}&appid=${openWeatherAPIKEY}")
                     val weatherJSON = apiConnector.getJSONString(url)
-                    Log.i(TAG, weatherJSON)
+                    Log.d(TAG, weatherJSON)
 
                     val weather = Klaxon().parse<WeatherBase>(weatherJSON)
 
-                    Log.i(TAG, weather.toString())
+                    Log.d(TAG, weather.toString())
 
                     if (weather != null) {
                         currentWeather = weather.weather[0].main
@@ -101,10 +106,10 @@ class PlantagotchiModel(val activity: ComponentActivity): SensorEventListener {
                     val url =
                         URL("https://api.sunrise-sunset.org/json?lat=${it.latitude}&lng=-${it.longitude}&formatted=0\n")
                     val sunriseSunsetJSON = apiConnector.getJSONString(url)
-                    Log.i(TAG, sunriseSunsetJSON)
+                    Log.d(TAG, sunriseSunsetJSON)
 
                     val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
-                    Log.i(TAG, sunriseSunset.toString())
+                    Log.d(TAG, sunriseSunset.toString())
 
                     if (sunriseSunset != null) {
 
@@ -114,7 +119,7 @@ class PlantagotchiModel(val activity: ComponentActivity): SensorEventListener {
 
                         lastCheck = currentDateTime.toString()
 
-                        if(currentDateTime > sunrise && currentDateTime < sunset){
+                        if (currentDateTime > sunrise && currentDateTime < sunset) {
                             nightDay = "We are in daylight"
                         } else {
                             nightDay = "It's nighttime"
