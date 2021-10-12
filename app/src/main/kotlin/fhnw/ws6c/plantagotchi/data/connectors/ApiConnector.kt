@@ -21,7 +21,9 @@ class ApiConnector {
      * Get some JSON from an API
      */
     fun getJSONString(url: URL, token: String = ""): String {
+
         try {
+
             val conn = url.openConnection() as HttpsURLConnection
 
             if (!token.isEmpty()) {
@@ -43,8 +45,12 @@ class ApiConnector {
                 }
                 jsonData.append(line + "n")
             } while (true)
+
+
             br.close()
             inputStream.close()
+            conn.disconnect()
+
             return jsonData.toString()
 
         } catch (e: Exception) {

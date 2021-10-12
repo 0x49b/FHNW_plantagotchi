@@ -2,7 +2,6 @@ package fhnw.ws6c.plantagotchi.data.weather
 
 
 data class WeatherBase(
-
     val coord: Coord,
     val weather: List<Weather>,
     val base: String,

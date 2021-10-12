@@ -14,7 +14,7 @@ import fhnw.ws6c.plantagotchi.data.GeoPosition
  */
 class GPSConnector(val activity: Activity) {
 
-    private val aelggi = GeoPosition(latitude = 46.7976552, longitude = 8.236315, altitude = 1635.0)
+    private val aelggi = GeoPosition(latitude = 47.4809967, longitude =8.2115859, altitude = 1635.0)
     private val PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
