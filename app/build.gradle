@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -54,6 +55,7 @@ dependencies {
 
     // fuer den Layout Inspector
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.5.30'
+    implementation 'com.google.firebase:firebase-database:19.2.1'
 
 
     testImplementation 'junit:junit:4.13.2'

@@ -7,7 +7,7 @@
 
 
 === Links zu API's
-Wetter API: https://openweathermap.org/current#geo
-Tag/Nacht: https://sunrise-sunset.org/api
-Voice: https://developer.android.com/training/wearables/user-input/voice
-Light Sensor: https://github.com/AndroidCodility/LightSensor
+* Wetter API: https://openweathermap.org/current#geo
+* Tag/Nacht: https://sunrise-sunset.org/api
+* Voice: https://developer.android.com/training/wearables/user-input/voice
+* Light Sensor: https://github.com/AndroidCodility/LightSensor
