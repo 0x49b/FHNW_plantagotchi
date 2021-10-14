@@ -33,7 +33,8 @@ import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
-class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(), SensorEventListener {
+class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
+    SensorEventListener {
 
     private var TAG = "PlantagotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -92,12 +93,18 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(), 
                     val weatherJSON = apiConnector.getJSONString(url)
                     Log.d(TAG, weatherJSON)
 
-                    val weather = Klaxon().parse<WeatherBase>(weatherJSON)
+                    try {
 
-                    Log.d(TAG, weather.toString())
 
-                    if (weather != null) {
-                        currentWeather = weather.weather[0].main
+                        val weather = Klaxon().parse<WeatherBase>(weatherJSON)
+
+                        Log.d(TAG, weather.toString())
+
+                        if (weather != null) {
+                            currentWeather = weather.weather[0].main
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "$e")
                     }
 
                 }
@@ -108,29 +115,35 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(), 
                     val sunriseSunsetJSON = apiConnector.getJSONString(url)
                     Log.d(TAG, sunriseSunsetJSON)
 
-                    val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
-                    Log.d(TAG, sunriseSunset.toString())
+                    try {
 
-                    if (sunriseSunset != null) {
 
-                        val sunrise = ZonedDateTime.parse(sunriseSunset.results.sunrise)
-                        val sunset = ZonedDateTime.parse(sunriseSunset.results.sunset)
-                        val currentDateTime = ZonedDateTime.now()
+                        val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
+                        Log.d(TAG, sunriseSunset.toString())
 
-                        lastCheck = currentDateTime.toString()
+                        if (sunriseSunset != null) {
 
-                        if (currentDateTime > sunrise && currentDateTime < sunset) {
-                            nightDay = "We are in daylight"
-                        } else {
-                            nightDay = "It's nighttime"
+                            val sunrise = ZonedDateTime.parse(sunriseSunset.results.sunrise)
+                            val sunset = ZonedDateTime.parse(sunriseSunset.results.sunset)
+                            val currentDateTime = ZonedDateTime.now()
+
+                            lastCheck = currentDateTime.toString()
+
+                            if (currentDateTime > sunrise && currentDateTime < sunset) {
+                                nightDay = "We are in daylight"
+                            } else {
+                                nightDay = "It's nighttime"
+                            }
+
                         }
-
+                    } catch (e: Exception) {
+                        Log.e(TAG, "$e")
                     }
                 }
 
 
             },
-            onFailure = { position = "Cannot get current location" },
+            onFailure = { position = "Cannot get current position" },
             onPermissionDenied = {
                 val permissions = arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
