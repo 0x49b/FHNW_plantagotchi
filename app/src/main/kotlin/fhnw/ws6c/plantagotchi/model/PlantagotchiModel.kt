@@ -50,10 +50,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var openWeatherAPIKEY = "4a95a98df24aeeb48956f2c2f3db0502"
 
 
-    var position by mutableStateOf("")
-    var currentWeather by mutableStateOf("")
-    var nightDay by mutableStateOf("")
-    var lastCheck by mutableStateOf("")
+    var position by mutableStateOf("Getting position ...")
+    var currentWeather by mutableStateOf("Getting current weather ...")
+    var nightDay by mutableStateOf("Checking Night or Day ...")
+    var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var currentLux by mutableStateOf(0.0f)
 
     // Todo: Maybe redesign later
@@ -117,7 +117,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
                     try {
 
-
                         val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
                         Log.d(TAG, sunriseSunset.toString())
 
@@ -136,6 +135,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                             }
 
                         }
+
                     } catch (e: Exception) {
                         Log.e(TAG, "$e")
                     }
