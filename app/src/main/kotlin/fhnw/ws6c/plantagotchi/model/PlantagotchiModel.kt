@@ -17,6 +17,10 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.beust.klaxon.Klaxon
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
@@ -41,6 +45,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private var sensorManager: SensorManager =
         activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
+
 
 
     var title = "Hello ws6C"
@@ -81,7 +86,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-
     fun getCurrentWeather() {
         gpsConnector.getLocation(
             onSuccess = {
@@ -104,7 +108,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                             currentWeather = weather.weather[0].main
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "$e")
+                        Log.e(TAG, "Error in OpenWeatherCall: $e")
                     }
 
                 }
@@ -137,7 +141,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                         }
 
                     } catch (e: Exception) {
-                        Log.e(TAG, "$e")
+                        Log.e(TAG, "Error in SunriseSunset Call: $e")
                     }
                 }
 
