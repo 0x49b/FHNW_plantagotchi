@@ -6,8 +6,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -15,12 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import com.beust.klaxon.Klaxon
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ktx.database
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
@@ -30,8 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.URL
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
@@ -40,19 +31,28 @@ import kotlin.concurrent.fixedRateTimer
 class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     SensorEventListener {
 
-    private var TAG = "PlantagotchiModel"
+    private val TAG = "PlantagotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var sensorManager: SensorManager =
         activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
 
 
-
-    var title = "Hello ws6C"
+    var title = "Plantagotchi Stats"
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
 
     var openWeatherAPIKEY = "4a95a98df24aeeb48956f2c2f3db0502"
+
+
+    /**
+     * Decays for LUX, CO2, WATER, FERTILIZER
+     */
+    val LUX_DECAY = 0.1f
+    val CO2_DECAY = 0.1f
+    val WATER_DECAY = 0.1f
+    val FERTILIZER_DECAY = 0.1f
+
 
 
     var position by mutableStateOf("Getting position ...")
@@ -71,7 +71,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             period = 10000,
             daemon = true
         ) {
-            getCurrentWeather()
+            getWeatherDayOrNight()
         }
     }
 
@@ -86,32 +86,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    fun getCurrentWeather() {
+    fun getWeatherDayOrNight() {
         gpsConnector.getLocation(
             onSuccess = {
                 position = "${it.latitude},${it.longitude}"
-
-                modelScope.launch {
-                    val url =
-                        URL("https://api.openweathermap.org/data/2.5/weather?lat=${it.latitude}&lon=${it.longitude}&appid=${openWeatherAPIKEY}")
-                    val weatherJSON = apiConnector.getJSONString(url)
-                    Log.d(TAG, weatherJSON)
-
-                    try {
-
-
-                        val weather = Klaxon().parse<WeatherBase>(weatherJSON)
-
-                        Log.d(TAG, weather.toString())
-
-                        if (weather != null) {
-                            currentWeather = weather.weather[0].main
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error in OpenWeatherCall: $e")
-                    }
-
-                }
 
                 modelScope.launch {
                     val url =
@@ -143,6 +121,24 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                     } catch (e: Exception) {
                         Log.e(TAG, "Error in SunriseSunset Call: $e")
                     }
+                }
+
+                modelScope.launch {
+                    val url =
+                        URL("https://api.openweathermap.org/data/2.5/weather?lat=${it.latitude}&lon=${it.longitude}&appid=${openWeatherAPIKEY}")
+                    val weatherJSON = apiConnector.getJSONString(url)
+                    Log.d(TAG, weatherJSON)
+
+                    try {
+                        val weather = Klaxon().parse<WeatherBase>(weatherJSON)
+                        Log.d(TAG, weather.toString())
+                        if (weather != null) {
+                            currentWeather = weather.weather[0].main
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in OpenWeatherCall: $e")
+                    }
+
                 }
 
 
