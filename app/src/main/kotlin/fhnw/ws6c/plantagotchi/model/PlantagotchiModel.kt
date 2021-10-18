@@ -13,7 +13,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import com.beust.klaxon.Klaxon
+import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
@@ -41,13 +43,13 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
 
-    var openWeatherAPIKEY = "4a95a98df24aeeb48956f2c2f3db0502"
+    var openWeatherAPIKEY = "02919ee1c89c8c9646a39e2856c07d99"
 
 
     /**
      * Decays for LUX, CO2, WATER, FERTILIZER
      */
-    val LUX_DECAY = 0.0025f
+    val LUX_DECAY = 100.0f / 86400.0f // 100 percent / 867400 seconds
     val WATER_DECAY = 0.1f
     val FERTILIZER_DECAY = 0.1f
 
@@ -55,6 +57,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var position by mutableStateOf("Getting position ...")
     var currentWeather by mutableStateOf("Getting current weather ...")
     var nightDay by mutableStateOf("Checking Night or Day ...")
+    var dark by mutableStateOf(false)
     var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var sensorLux by mutableStateOf(0.0f)
 
@@ -114,6 +117,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             }
         } else {
             gameLux -= LUX_DECAY
+        }
+
+        if(gameLux < 20.0f){
+           // send notification to user to inform less than 20% of lux
         }
 
         Log.d(TAG, "GameLux: $gameLux")
@@ -182,8 +189,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
                     if (currentDateTime > sunrise && currentDateTime < sunset) {
                         nightDay = "We are in daylight"
+                        dark = false
                     } else {
                         nightDay = "It's nighttime"
+                        dark = true
                     }
                 }
             } catch (e: Exception) {

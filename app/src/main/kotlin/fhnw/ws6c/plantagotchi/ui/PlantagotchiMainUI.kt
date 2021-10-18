@@ -24,12 +24,12 @@ import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 fun AppUI(model: PlantagotchiModel) {
     with(model) {
 
-        PlantagotchiTheme {
+        PlantagotchiTheme(darkTheme = dark){
 
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color(0xFF0EE4FF))
+                    .background(color = MaterialTheme.colors.background)
             ) {
 
                 val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter) = createRefs()
