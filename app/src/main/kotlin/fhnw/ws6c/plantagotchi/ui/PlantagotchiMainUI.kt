@@ -130,7 +130,7 @@ fun AppUI(model: PlantagotchiModel) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally){
 
                         Text(
-                            text = "%.0f".format(gameLux),
+                            text = "%.0f".format(gameLux) + "%",
                             textAlign = TextAlign.Center,
                             color = Color(0xFF003036),
                             modifier = Modifier

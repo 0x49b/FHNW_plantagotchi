@@ -109,6 +109,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         if (sensorLux > 1000) {
             if (gameLux <= 100.0) {
                 gameLux += 0.1f
+            }else {
+                gameLux = 100.0f
             }
         } else {
             gameLux -= LUX_DECAY
