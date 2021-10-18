@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
-import fhnw.ws6c.plantagotchi.data.connectors.AppPreferences
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
 import fhnw.ws6c.plantagotchi.data.weather.WeatherBase
@@ -33,7 +32,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     private val TAG = "PlantagotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var sensorManager: SensorManager =  activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private var sensorManager: SensorManager =
+        activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
 
 
@@ -47,8 +47,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     /**
      * Decays for LUX, CO2, WATER, FERTILIZER
      */
-    val LUX_DECAY = 0.1f
-    val CO2_DECAY = 0.1f
+    val LUX_DECAY = 0.0025f
     val WATER_DECAY = 0.1f
     val FERTILIZER_DECAY = 0.1f
 
@@ -57,7 +56,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var currentWeather by mutableStateOf("Getting current weather ...")
     var nightDay by mutableStateOf("Checking Night or Day ...")
     var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
-    var currentLux by mutableStateOf(0.0f)
+    var sensorLux by mutableStateOf(0.0f)
+
+    var gameLux by mutableStateOf(100.0f)
 
     // Todo: Maybe redesign later
     init {
@@ -92,14 +93,30 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_LIGHT) {
-            currentLux = event.values[0]
-            Log.d(TAG, "Current lux: $currentLux")
+            sensorLux = event.values[0]
+            Log.d(TAG, "Current lux: $sensorLux")
         }
     }
 
     fun gameLoop() {
 
+        checkLux()
+
     }
+
+
+    fun checkLux() {
+        if (sensorLux > 1000) {
+            if (gameLux <= 100.0) {
+                gameLux += 0.1f
+            }
+        } else {
+            gameLux -= LUX_DECAY
+        }
+
+        Log.d(TAG, "GameLux: $gameLux")
+    }
+
 
     fun dataLoop() {
         gpsConnector.getLocation(

@@ -4,20 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
@@ -30,13 +26,11 @@ fun AppUI(model: PlantagotchiModel) {
 
         PlantagotchiTheme {
 
-
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = Color(0xFF0EE4FF))
             ) {
-
 
                 val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter) = createRefs()
 
@@ -74,7 +68,7 @@ fun AppUI(model: PlantagotchiModel) {
                     })
 
                 Text(
-                    text = "$currentLux lux",
+                    text = "$sensorLux lux",
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.constrainAs(lux) {
                         top.linkTo(dn.bottom, 1.dp)
@@ -99,7 +93,7 @@ fun AppUI(model: PlantagotchiModel) {
                             bottom.linkTo(pot.top, (-2).dp)
                         })
 
-                Image(painterResource(id = R.drawable.ic_pot11),
+                Image(painterResource(id = R.drawable.ic_pot12),
                     contentDescription = "the_pot",
                     modifier = Modifier
                         .constrainAs(pot) {
@@ -116,7 +110,8 @@ fun AppUI(model: PlantagotchiModel) {
                             end.linkTo(parent.end, 5.dp)
                         }
                         .background(Color(0xFFFFEB3B), shape = CircleShape)
-                        .layout() { measurable, constraints ->
+                        .size(90.dp)
+                        /*.layout() { measurable, constraints ->
                             // Measure the composable
                             val placeable = measurable.measure(constraints)
 
@@ -131,16 +126,22 @@ fun AppUI(model: PlantagotchiModel) {
                                 // Where the composable gets placed
                                 placeable.placeRelative(0, (heightCircle - currentHeight) / 2)
                             }
-                        }) {
+                        }*/) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally){
 
-                    Text(
-                        text = "100",
-                        textAlign = TextAlign.Center,
-                        color = Color(0xFF003036),
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .defaultMinSize(24.dp) //Use a min size for short text.
-                    )
+                        Text(
+                            text = "%.0f".format(gameLux),
+                            textAlign = TextAlign.Center,
+                            color = Color(0xFF003036),
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .defaultMinSize(30.dp) //Use a min size for short text.
+                        )
+                        Text(
+                            text = "lux",
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
 
             }
