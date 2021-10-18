@@ -28,5 +28,6 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         app.onStop(activity = this)
     }
+
 }
 

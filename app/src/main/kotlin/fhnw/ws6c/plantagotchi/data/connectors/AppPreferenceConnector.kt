@@ -2,14 +2,16 @@ package fhnw.ws6c.plantagotchi.data.connectors
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.time.ZonedDateTime
 
 enum class Prefs(key: String) {
     PLANTNAME("plantname"),
     FIRSTRUN("firstrun"),
+    LAST_STOP("last_stop"),
 }
 
 object AppPreferences {
-    private const val NAME = "ThatsAppPreferences"
+    private const val NAME = "PlantagotchiPreferences"
     private const val MODE = Context.MODE_PRIVATE
     private lateinit var preferences: SharedPreferences
 
@@ -32,6 +34,10 @@ object AppPreferences {
         editor.remove(key.toString())
         editor.apply()
     }
+
+    var last_stop: ZonedDateTime
+        get() = ZonedDateTime.parse(preferences.getString(Prefs.LAST_STOP.toString(), ""))
+        set(value) = preferences.edit { it.putString(Prefs.LAST_STOP.toString(), value.toString()) }
 
     var plantname: String
         get() = preferences.getString(Prefs.PLANTNAME.toString(), "").toString()

@@ -3,101 +3,147 @@ package fhnw.ws6c.plantagotchi.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
-import androidx.compose.material.Scaffold
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.constraintlayout.compose.ConstraintLayout
 import fhnw.ws6c.R
+import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
+import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 
 
 @Composable
 fun AppUI(model: PlantagotchiModel) {
     with(model) {
 
-
-        ConstraintLayout(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color(0xFF0EE4FF))
-        ) {
+        PlantagotchiTheme {
 
 
-            val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc) = createRefs()
-
-            Text(
-                text = title,
-                style = TextStyle(fontSize = 35.sp),
-                modifier = Modifier.constrainAs(stats) {
-                    end.linkTo(parent.end, 5.dp)
-                    top.linkTo(parent.top, 5.dp)
-                })
-
-            Text(
-                text = position,
-                style = TextStyle(fontSize = 20.sp),
-                modifier = Modifier.constrainAs(pos) {
-                    end.linkTo(parent.end, 5.dp)
-                    top.linkTo(stats.bottom, 5.dp)
-                }
-            )
-
-            Text(
-                text = currentWeather,
-                style = TextStyle(fontSize = 20.sp),
-                modifier = Modifier.constrainAs(weather) {
-                    top.linkTo(pos.bottom, 1.dp)
-                    end.linkTo(parent.end, 5.dp)
-                })
-
-            Text(
-                text = nightDay,
-                style = TextStyle(fontSize = 20.sp),
-                modifier = Modifier.constrainAs(dn) {
-                    top.linkTo(weather.bottom, 1.dp)
-                    end.linkTo(parent.end, 5.dp)
-                })
-
-            Text(
-                text = "$currentLux lux",
-                style = TextStyle(fontSize = 20.sp),
-                modifier = Modifier.constrainAs(lux) {
-                    top.linkTo(dn.bottom, 1.dp)
-                    end.linkTo(parent.end, 5.dp)
-                })
-
-            Text(
-                text = "Last update: $lastCheck",
+            ConstraintLayout(
                 modifier = Modifier
-                    .constrainAs(lc) {
-                        top.linkTo(lux.bottom, 1.dp)
+                    .fillMaxSize()
+                    .background(color = Color(0xFF0EE4FF))
+            ) {
+
+
+                val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter) = createRefs()
+
+                Text(
+                    text = statsTitle,
+                    style = MaterialTheme.typography.h5,
+                    modifier = Modifier.constrainAs(stats) {
+                        end.linkTo(parent.end, 5.dp)
+                        top.linkTo(parent.top, 5.dp)
+                    })
+
+                Text(
+                    text = position,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.constrainAs(pos) {
+                        end.linkTo(parent.end, 5.dp)
+                        top.linkTo(stats.bottom, 5.dp)
+                    }
+                )
+
+                Text(
+                    text = currentWeather,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.constrainAs(weather) {
+                        top.linkTo(pos.bottom, 1.dp)
                         end.linkTo(parent.end, 5.dp)
                     })
 
-
-
-            Image(painterResource(id = R.drawable.ic_plant1),
-                contentDescription = "the_plant",
-                modifier = Modifier
-                    .constrainAs(plant) {
-                        bottom.linkTo(pot.top, (-2).dp)
+                Text(
+                    text = nightDay,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.constrainAs(dn) {
+                        top.linkTo(weather.bottom, 1.dp)
+                        end.linkTo(parent.end, 5.dp)
                     })
 
-            Image(painterResource(id = R.drawable.ic_pot11),
-                contentDescription = "the_pot",
-                modifier = Modifier
-                    .constrainAs(pot) {
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
+                Text(
+                    text = "$currentLux lux",
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.constrainAs(lux) {
+                        top.linkTo(dn.bottom, 1.dp)
+                        end.linkTo(parent.end, 5.dp)
                     })
+
+                Text(
+                    text = "Last update: $lastCheck",
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier
+                        .constrainAs(lc) {
+                            top.linkTo(lux.bottom, 1.dp)
+                            end.linkTo(parent.end, 5.dp)
+                        })
+
+
+
+                Image(painterResource(id = R.drawable.ic_plant2),
+                    contentDescription = "the_plant",
+                    modifier = Modifier
+                        .constrainAs(plant) {
+                            bottom.linkTo(pot.top, (-2).dp)
+                        })
+
+                Image(painterResource(id = R.drawable.ic_pot11),
+                    contentDescription = "the_pot",
+                    modifier = Modifier
+                        .constrainAs(pot) {
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                        })
+
+
+
+                Box(contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .constrainAs(luxMeter) {
+                            bottom.linkTo(parent.bottom, 5.dp)
+                            end.linkTo(parent.end, 5.dp)
+                        }
+                        .background(Color(0xFFFFEB3B), shape = CircleShape)
+                        .layout() { measurable, constraints ->
+                            // Measure the composable
+                            val placeable = measurable.measure(constraints)
+
+                            //get the current max dimension to assign width=height
+                            val currentHeight = placeable.height
+                            var heightCircle = currentHeight
+                            if (placeable.width > heightCircle)
+                                heightCircle = placeable.width
+
+                            //assign the dimension and the center position
+                            layout(heightCircle, heightCircle) {
+                                // Where the composable gets placed
+                                placeable.placeRelative(0, (heightCircle - currentHeight) / 2)
+                            }
+                        }) {
+
+                    Text(
+                        text = "100",
+                        textAlign = TextAlign.Center,
+                        color = Color(0xFF003036),
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .defaultMinSize(24.dp) //Use a min size for short text.
+                    )
+                }
+
+            }
         }
     }
 }

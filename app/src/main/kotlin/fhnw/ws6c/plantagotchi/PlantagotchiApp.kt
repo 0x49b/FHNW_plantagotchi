@@ -7,6 +7,7 @@ import fhnw.ws6c.EmobaApp
 import fhnw.ws6c.plantagotchi.data.connectors.AppPreferences
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.AppUI
+import fhnw.ws6c.plantagotchi.ui.LoadingScreen
 
 
 object PlantagotchiApp : EmobaApp {
@@ -18,13 +19,12 @@ object PlantagotchiApp : EmobaApp {
     override fun initialize(activity: ComponentActivity) {
         AppPreferences.init(activity)
         model = PlantagotchiModel(activity)
-
     }
 
     @Composable
     override fun CreateUI() {
+        // LoadingScreen(model)
         AppUI(model)
     }
-
 }
 

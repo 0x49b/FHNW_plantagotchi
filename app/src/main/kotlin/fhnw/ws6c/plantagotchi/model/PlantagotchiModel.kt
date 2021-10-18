@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
+import fhnw.ws6c.plantagotchi.data.connectors.AppPreferences
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
 import fhnw.ws6c.plantagotchi.data.weather.WeatherBase
@@ -24,7 +25,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.time.ZonedDateTime
-import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
@@ -33,12 +33,11 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     private val TAG = "PlantagotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var sensorManager: SensorManager =
-        activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private var sensorManager: SensorManager =  activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
 
 
-    var title = "Plantagotchi Stats"
+    var statsTitle = "Plantagotchi Stats"
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
 
@@ -54,7 +53,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     val FERTILIZER_DECAY = 0.1f
 
 
-
     var position by mutableStateOf("Getting position ...")
     var currentWeather by mutableStateOf("Getting current weather ...")
     var nightDay by mutableStateOf("Checking Night or Day ...")
@@ -63,17 +61,30 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     // Todo: Maybe redesign later
     init {
+
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
+
         fixedRateTimer(
-            name = "plantagotchi-data-load",
+            name = "plantagotchi-data-loop",
             initialDelay = 0,
-            period = 10000,
+            period = 60000,
             daemon = true
         ) {
-            getWeatherDayOrNight()
+            dataLoop()
         }
+
+        fixedRateTimer(
+            name = "plantagotchi-game-loop",
+            initialDelay = 0,
+            period = 1000,
+            daemon = true
+        ) {
+            gameLoop()
+        }
+
     }
+
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // braucht es aktuell nicht
@@ -86,62 +97,16 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    fun getWeatherDayOrNight() {
+    fun gameLoop() {
+
+    }
+
+    fun dataLoop() {
         gpsConnector.getLocation(
             onSuccess = {
                 position = "${it.latitude},${it.longitude}"
-
-                modelScope.launch {
-                    val url =
-                        URL("https://api.sunrise-sunset.org/json?lat=${it.latitude}&lng=-${it.longitude}&formatted=0\n")
-                    val sunriseSunsetJSON = apiConnector.getJSONString(url)
-                    Log.d(TAG, sunriseSunsetJSON)
-
-                    try {
-
-                        val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
-                        Log.d(TAG, sunriseSunset.toString())
-
-                        if (sunriseSunset != null) {
-
-                            val sunrise = ZonedDateTime.parse(sunriseSunset.results.sunrise)
-                            val sunset = ZonedDateTime.parse(sunriseSunset.results.sunset)
-                            val currentDateTime = ZonedDateTime.now()
-
-                            lastCheck = currentDateTime.toString()
-
-                            if (currentDateTime > sunrise && currentDateTime < sunset) {
-                                nightDay = "We are in daylight"
-                            } else {
-                                nightDay = "It's nighttime"
-                            }
-
-                        }
-
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error in SunriseSunset Call: $e")
-                    }
-                }
-
-                modelScope.launch {
-                    val url =
-                        URL("https://api.openweathermap.org/data/2.5/weather?lat=${it.latitude}&lon=${it.longitude}&appid=${openWeatherAPIKEY}")
-                    val weatherJSON = apiConnector.getJSONString(url)
-                    Log.d(TAG, weatherJSON)
-
-                    try {
-                        val weather = Klaxon().parse<WeatherBase>(weatherJSON)
-                        Log.d(TAG, weather.toString())
-                        if (weather != null) {
-                            currentWeather = weather.weather[0].main
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error in OpenWeatherCall: $e")
-                    }
-
-                }
-
-
+                loadSunriseSunsetData(it.latitude, it.longitude)
+                loadWeatherData(it.latitude, it.longitude)
             },
             onFailure = { position = "Cannot get current position" },
             onPermissionDenied = {
@@ -154,4 +119,57 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         )
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun loadWeatherData(latitude: Double, longitude: Double) {
+        modelScope.launch {
+            val url =
+                URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$openWeatherAPIKEY")
+            val weatherJSON = apiConnector.getJSONString(url)
+            Log.d(TAG, weatherJSON)
+
+            try {
+                val weather = Klaxon().parse<WeatherBase>(weatherJSON)
+                Log.d(TAG, weather.toString())
+                if (weather != null) {
+                    currentWeather = weather.weather[0].main
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in OpenWeatherCall: $e")
+            }
+
+        }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun loadSunriseSunsetData(latitude: Double, longitude: Double) {
+        modelScope.launch {
+            val url =
+                URL("https://api.sunrise-sunset.org/json?lat=$latitude&lng=-$longitude&formatted=0")
+            val sunriseSunsetJSON = apiConnector.getJSONString(url)
+            Log.d(TAG, sunriseSunsetJSON)
+
+            try {
+
+                val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
+                Log.d(TAG, sunriseSunset.toString())
+
+                if (sunriseSunset != null) {
+
+                    val sunrise = ZonedDateTime.parse(sunriseSunset.results.sunrise)
+                    val sunset = ZonedDateTime.parse(sunriseSunset.results.sunset)
+                    val currentDateTime = ZonedDateTime.now()
+
+                    lastCheck = currentDateTime.toString()
+
+                    if (currentDateTime > sunrise && currentDateTime < sunset) {
+                        nightDay = "We are in daylight"
+                    } else {
+                        nightDay = "It's nighttime"
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in SunriseSunset Call: $e")
+            }
+        }
+    }
 }
