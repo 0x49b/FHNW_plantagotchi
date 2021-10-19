@@ -2,6 +2,7 @@ package fhnw.ws6c.plantagotchi.model
 
 import android.Manifest
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.beust.klaxon.Klaxon
@@ -45,6 +47,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     var openWeatherAPIKEY = "02919ee1c89c8c9646a39e2856c07d99"
 
+    var loader by mutableStateOf<Drawable?>(null)
+    var i by mutableStateOf(0)
+
 
     /**
      * Decays for LUX, CO2, WATER, FERTILIZER
@@ -68,6 +73,35 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
+
+        fixedRateTimer(
+            name = "loading-timer",
+            initialDelay = 5000,
+            period = 1500,
+            daemon = true
+        ) {
+            Log.d(TAG, "Here in the loader current i $i")
+            when (i) {
+                0 -> loader = activity.getDrawable(R.drawable.p0)
+                1 -> loader = activity.getDrawable(R.drawable.p10)
+                2 -> loader = activity.getDrawable(R.drawable.p20)
+                3 -> loader = activity.getDrawable(R.drawable.p30)
+                4 -> loader = activity.getDrawable(R.drawable.p40)
+                5 -> loader = activity.getDrawable(R.drawable.p50)
+                6 -> loader = activity.getDrawable(R.drawable.p60)
+                7 -> loader = activity.getDrawable(R.drawable.p70)
+                8 -> loader = activity.getDrawable(R.drawable.p80)
+                9 -> loader = activity.getDrawable(R.drawable.p90)
+                10 -> loader = activity.getDrawable(R.drawable.p100)
+            }
+            i += 1
+
+            Log.d(TAG, "Current loader $loader")
+
+            if(i > 10){
+                this.cancel()
+            }
+        }
 
         fixedRateTimer(
             name = "plantagotchi-data-loop",
@@ -112,15 +146,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         if (sensorLux > 1000) {
             if (gameLux <= 100.0) {
                 gameLux += 0.1f
-            }else {
+            } else {
                 gameLux = 100.0f
             }
         } else {
             gameLux -= LUX_DECAY
         }
 
-        if(gameLux < 20.0f){
-           // send notification to user to inform less than 20% of lux
+        if (gameLux < 20.0f) {
+            // send notification to user to inform less than 20% of lux
         }
 
         Log.d(TAG, "GameLux: $gameLux")

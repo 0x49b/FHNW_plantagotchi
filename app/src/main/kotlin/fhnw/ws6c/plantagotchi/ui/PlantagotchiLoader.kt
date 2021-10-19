@@ -23,21 +23,17 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
+import com.skydoves.landscapist.CircularReveal
+import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
 fun LoadingScreen(model: PlantagotchiModel) {
     with(model) {
 
-        Box {
-
-            Image(
-                painterResource(id = R.drawable.ic_loaderbg),
-                contentDescription = "loader-background",
-                modifier = Modifier.fillMaxSize(),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.FillBounds,
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
 
 
             Column(
@@ -52,10 +48,17 @@ fun LoadingScreen(model: PlantagotchiModel) {
                     text = "Hello Loader",
                     style = TextStyle(fontSize = 35.sp),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                CircularProgressIndicator()
+
+                /*CoilImage(
+                    imageModel = R.drawable.p0,
+                    contentScale = ContentScale.Crop,
+                    circularReveal = CircularReveal(duration = 250)
+                )*/
+
+                Image(loader)
 
             }
         }
