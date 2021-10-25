@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +31,7 @@ fun AppUI(model: PlantagotchiModel) {
                     .background(color = MaterialTheme.colors.background)
             ) {
 
-                val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter) = createRefs()
+                val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter, accel) = createRefs()
 
                 Text(
                     text = statsTitle,
@@ -43,7 +42,7 @@ fun AppUI(model: PlantagotchiModel) {
                     })
 
                 Text(
-                    text = position,
+                    text = positionData,
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.constrainAs(pos) {
                         end.linkTo(parent.end, 5.dp)
@@ -76,12 +75,22 @@ fun AppUI(model: PlantagotchiModel) {
                     })
 
                 Text(
+                    text = accelerometerData,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.constrainAs(accel) {
+                        top.linkTo(lux.bottom, 1.dp)
+                        end.linkTo(parent.end, 5.dp)
+                    })
+
+
+
+                Text(
                     text = "Last update: $lastCheck",
                     style = MaterialTheme.typography.caption,
                     modifier = Modifier
                         .constrainAs(lc) {
-                            top.linkTo(lux.bottom, 1.dp)
-                            end.linkTo(parent.end, 5.dp)
+                            top.linkTo(accel.bottom, 1.dp)
+                            start.linkTo(parent.end, 5.dp)
                         })
 
 

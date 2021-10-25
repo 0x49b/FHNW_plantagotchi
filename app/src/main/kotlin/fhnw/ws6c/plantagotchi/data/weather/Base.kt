@@ -10,10 +10,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 For support, please feel free to contact me at https://www.linkedin.com/in/syedabsar */
 
 
-data class Weather (
+data class Base (
 
-	val id : Int,
-	val main : String,
-	val description : String,
-	val icon : String
+	val lat : Double,
+	val lon : Double,
+	val timezone : String,
+	val timezone_offset : Int,
+	val current : Current
 )

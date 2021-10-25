@@ -23,8 +23,18 @@ object PlantagotchiApp : EmobaApp {
 
     @Composable
     override fun CreateUI() {
-        LoadingScreen(model)
-        //AppUI(model)
+        with(model){
+
+            /*
+            if(loading){
+                LoadingScreen(model)
+            }else{
+                AppUI(model)
+            }
+            */
+
+            AppUI(model)
+        }
     }
 }
 

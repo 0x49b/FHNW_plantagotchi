@@ -14,7 +14,7 @@ import fhnw.ws6c.plantagotchi.data.GeoPosition
  */
 class GPSConnector(val activity: Activity) {
 
-    private val aelggi = GeoPosition(latitude = 47.4809967, longitude =8.2115859, altitude = 1635.0)
+    private val brugg = GeoPosition(latitude = 47.4809967, longitude =8.2115859, altitude = 1635.0)
     private val PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -41,7 +41,7 @@ class GPSConnector(val activity: Activity) {
                 .addOnSuccessListener(activity) {
                     // der Emulator liefert null zurueck. In diesem Fall nehmen wir einfach 'brugg'
                     onSuccess.invoke(
-                        if (it == null) aelggi else GeoPosition(
+                        if (it == null) brugg else GeoPosition(
                             it.longitude,
                             it.latitude,
                             it.altitude

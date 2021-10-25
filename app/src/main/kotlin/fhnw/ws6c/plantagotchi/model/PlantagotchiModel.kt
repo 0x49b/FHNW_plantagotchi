@@ -1,6 +1,8 @@
 package fhnw.ws6c.plantagotchi.model
 
+import Base
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.hardware.Sensor
@@ -13,15 +15,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import com.beust.klaxon.Klaxon
 import fhnw.ws6c.R
+import fhnw.ws6c.plantagotchi.data.GeoPosition
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
-import fhnw.ws6c.plantagotchi.data.weather.WeatherBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,24 +31,33 @@ import java.time.ZonedDateTime
 import kotlin.concurrent.fixedRateTimer
 
 
+@SuppressLint("UseCompatLoadingForDrawables")
 class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     SensorEventListener {
 
-    private val TAG = "PlantagotchiModel"
+    private val TAG = "PlantaGotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var sensorManager: SensorManager =
         activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
+    private var accelerometer: Sensor? = null
 
 
-    var statsTitle = "Plantagotchi Stats"
+    var statsTitle = "PlantaGotchi Stats"
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
 
-    var openWeatherAPIKEY = "02919ee1c89c8c9646a39e2856c07d99"
+    private var openWeatherAPIKEY = arrayOf(
+        "18b075743cb869bcc0fe9f4977f3696e",
+        "89256d338d3202fa44b7deac9b0c208a",
+        "1abd7b50c169e42776138698accfefc8",
+        "a04c01f715bebacc9295dcf9f22acf12",
+        "3867fa45c8569be5ce88e0337c5beba5"
+    )
 
     var loader by mutableStateOf<Drawable?>(null)
-    var i by mutableStateOf(0)
+    var loading by mutableStateOf(true)
+    var loaderText by mutableStateOf("Loading Plantagotchi")
 
 
     /**
@@ -59,49 +68,25 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     val FERTILIZER_DECAY = 0.1f
 
 
-    var position by mutableStateOf("Getting position ...")
+    var positionData by mutableStateOf("Getting position ...")
+    var position by mutableStateOf(GeoPosition())
     var currentWeather by mutableStateOf("Getting current weather ...")
     var nightDay by mutableStateOf("Checking Night or Day ...")
     var dark by mutableStateOf(false)
     var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var sensorLux by mutableStateOf(0.0f)
+    var accelerometerData by mutableStateOf("getting xyz")
 
     var gameLux by mutableStateOf(100.0f)
 
     // Todo: Maybe redesign later
     init {
 
+        setLoader(0, "loading data", true)
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
-
-        fixedRateTimer(
-            name = "loading-timer",
-            initialDelay = 5000,
-            period = 1500,
-            daemon = true
-        ) {
-            Log.d(TAG, "Here in the loader current i $i")
-            when (i) {
-                0 -> loader = activity.getDrawable(R.drawable.p0)
-                1 -> loader = activity.getDrawable(R.drawable.p10)
-                2 -> loader = activity.getDrawable(R.drawable.p20)
-                3 -> loader = activity.getDrawable(R.drawable.p30)
-                4 -> loader = activity.getDrawable(R.drawable.p40)
-                5 -> loader = activity.getDrawable(R.drawable.p50)
-                6 -> loader = activity.getDrawable(R.drawable.p60)
-                7 -> loader = activity.getDrawable(R.drawable.p70)
-                8 -> loader = activity.getDrawable(R.drawable.p80)
-                9 -> loader = activity.getDrawable(R.drawable.p90)
-                10 -> loader = activity.getDrawable(R.drawable.p100)
-            }
-            i += 1
-
-            Log.d(TAG, "Current loader $loader")
-
-            if(i > 10){
-                this.cancel()
-            }
-        }
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
 
         fixedRateTimer(
             name = "plantagotchi-data-loop",
@@ -131,14 +116,20 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_LIGHT) {
             sensorLux = event.values[0]
-            Log.d(TAG, "Current lux: $sensorLux")
+            //Log.d(TAG, "Current lux: $sensorLux")
+        }
+
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            accelerometerData = "${event.values[1]}/${event.values[0]}/${event.values[2]}"
+            /*Log.d(
+                TAG, "Accelerometer Change x: ${event.values[1]}, " +
+                        "y: ${event.values[0]}, z: ${event.values[2]}"
+            )*/
         }
     }
 
     fun gameLoop() {
-
         checkLux()
-
     }
 
 
@@ -161,14 +152,31 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     }
 
 
+    fun setLoader(percent: Int, message: String, running: Boolean) {
+        loading = running
+        loaderText = "$message"
+        when (percent) {
+            0 -> loader = activity.getDrawable(R.drawable.p0)
+            10 -> loader = activity.getDrawable(R.drawable.p10)
+            20 -> loader = activity.getDrawable(R.drawable.p20)
+            30 -> loader = activity.getDrawable(R.drawable.p30)
+            40 -> loader = activity.getDrawable(R.drawable.p40)
+            50 -> loader = activity.getDrawable(R.drawable.p50)
+            60 -> loader = activity.getDrawable(R.drawable.p60)
+            70 -> loader = activity.getDrawable(R.drawable.p70)
+            80 -> loader = activity.getDrawable(R.drawable.p80)
+            90 -> loader = activity.getDrawable(R.drawable.p90)
+            100 -> loader = activity.getDrawable(R.drawable.p100)
+        }
+    }
+
     fun dataLoop() {
         gpsConnector.getLocation(
             onSuccess = {
-                position = "${it.latitude},${it.longitude}"
-                loadSunriseSunsetData(it.latitude, it.longitude)
-                loadWeatherData(it.latitude, it.longitude)
+                positionData = "${it.latitude},${it.longitude}"
+                position = it
             },
-            onFailure = { position = "Cannot get current position" },
+            onFailure = { positionData = "Cannot get current position" },
             onPermissionDenied = {
                 val permissions = arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -177,21 +185,29 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 ActivityCompat.requestPermissions(activity, permissions, 10)
             }
         )
+        loadWeatherData(position.latitude, position.longitude)
+        loadSunriseSunsetData(position.latitude, position.longitude)
+    }
+
+
+    fun getAPIKey(): String {
+        return openWeatherAPIKEY[(0 until (openWeatherAPIKEY.size - 1)).random()]
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     fun loadWeatherData(latitude: Double, longitude: Double) {
         modelScope.launch {
-            val url =
-                URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$openWeatherAPIKEY")
+            val urlString =
+                "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&exclude=daily,minutely,hourly,alerts&appid=${getAPIKey()}"
+            val url = URL(urlString)
             val weatherJSON = apiConnector.getJSONString(url)
             Log.d(TAG, weatherJSON)
 
             try {
-                val weather = Klaxon().parse<WeatherBase>(weatherJSON)
+                val weather = Klaxon().parse<Base>(weatherJSON)
                 Log.d(TAG, weather.toString())
                 if (weather != null) {
-                    currentWeather = weather.weather[0].main
+                    currentWeather = weather.current.weather[0].description
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in OpenWeatherCall: $e")

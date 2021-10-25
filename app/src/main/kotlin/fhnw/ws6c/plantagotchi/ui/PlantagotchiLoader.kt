@@ -45,20 +45,19 @@ fun LoadingScreen(model: PlantagotchiModel) {
             ) {
 
                 Text(
-                    text = "Hello Loader",
+                    text = loaderText,
                     style = TextStyle(fontSize = 35.sp),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
 
 
-                /*CoilImage(
-                    imageModel = R.drawable.p0,
+                CoilImage(
+                    imageModel = loader,
                     contentScale = ContentScale.Crop,
                     circularReveal = CircularReveal(duration = 250)
-                )*/
+                )
 
-                Image(loader)
 
             }
         }
