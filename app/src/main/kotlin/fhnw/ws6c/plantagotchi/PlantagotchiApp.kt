@@ -1,13 +1,12 @@
 package fhnw.ws6c.plantagotchi
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import fhnw.ws6c.EmobaApp
-import fhnw.ws6c.plantagotchi.data.connectors.AppPreferences
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.AppUI
-import fhnw.ws6c.plantagotchi.ui.LoadingScreen
 
 
 object PlantagotchiApp : EmobaApp {
@@ -19,20 +18,13 @@ object PlantagotchiApp : EmobaApp {
     override fun initialize(activity: ComponentActivity) {
         AppPreferences.init(activity)
         model = PlantagotchiModel(activity)
+
+        // Todo load here gameState (maybe)
     }
 
     @Composable
     override fun CreateUI() {
-        with(model){
-
-            /*
-            if(loading){
-                LoadingScreen(model)
-            }else{
-                AppUI(model)
-            }
-            */
-
+        with(model) {
             AppUI(model)
         }
     }

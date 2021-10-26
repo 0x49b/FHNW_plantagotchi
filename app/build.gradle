@@ -72,6 +72,8 @@ dependencies {
     implementation "com.github.skydoves:landscapist-glide:1.3.9"
     implementation "com.github.skydoves:landscapist-coil:1.3.9"
     implementation "com.github.skydoves:landscapist-fresco:1.3.9"
+    implementation 'com.google.firebase:firebase-database-ktx:20.0.2'
+    implementation 'com.google.firebase:firebase-firestore-ktx:23.0.4'
 
 
     // Required for instrumented tests
@@ -80,6 +82,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     testImplementation 'org.json:json:20210307'
 
+
+    // making Firestore working in Emulator
+    implementation "io.grpc:grpc-okhttp:1.32.2"
 
 }
 

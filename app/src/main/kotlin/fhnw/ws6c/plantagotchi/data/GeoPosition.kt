@@ -3,15 +3,17 @@ package fhnw.ws6c.plantagotchi.data
 import java.util.*
 
 /**
- * From emoba Module
+ * From emoba Module, but changed to our needs
  */
-data class GeoPosition(val longitude: Double = 0.0, val latitude: Double = 0.0, val altitude: Double = 0.0) {
+data class GeoPosition(
+    val longitude: Double = 0.0,
+    val latitude: Double = 0.0,
+    val altitude: Double = 0.0
+) {
 
-    fun dms(): String {
-        return format(latitude, longitude)
+    override fun toString(): String {
+        return "$latitude,$longitude"
     }
-
-    fun asGoogleMapsURL() = "https://www.google.com/maps/place/${dms()}/@${latitude},${longitude},17z"
 
     private fun format(latitude: Double, longitude: Double): String {
         val latCompassDirection = if (latitude > 0.0) "N" else "S"
@@ -28,4 +30,5 @@ data class GeoPosition(val longitude: Double = 0.0, val latitude: Double = 0.0, 
 
         return "${degree}° ${minutes}′ ${String.format(Locale.ENGLISH, "%.4f", seconds)}″";
     }
+
 }

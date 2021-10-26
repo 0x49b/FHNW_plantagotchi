@@ -18,6 +18,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
         android:theme="@style/EmobaTheme">
+        <provider
+            android:authorities="fhnw.ws6c.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/providerfile"/>
+        </provider>
         <activity
             android:name="fhnw.ws6c.MainActivity"
             android:theme="@style/EmobaTheme.NoActionBar"

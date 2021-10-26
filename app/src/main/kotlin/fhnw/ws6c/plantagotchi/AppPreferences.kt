@@ -1,10 +1,11 @@
-package fhnw.ws6c.plantagotchi.data.connectors
+package fhnw.ws6c.plantagotchi
 
 import android.content.Context
 import android.content.SharedPreferences
 import java.time.ZonedDateTime
 
 enum class Prefs(key: String) {
+    PLAYER_ID("player_id"),
     PLANTNAME("plantname"),
     FIRSTRUN("firstrun"),
     LAST_STOP("last_stop"),
@@ -34,6 +35,10 @@ object AppPreferences {
         editor.remove(key.toString())
         editor.apply()
     }
+
+    var player_id: String
+        get() = preferences.getString(Prefs.PLAYER_ID.toString(), "").toString()
+        set(value) = preferences.edit { it.putString(Prefs.PLAYER_ID.toString(), value) }
 
     var last_stop: ZonedDateTime
         get() = ZonedDateTime.parse(preferences.getString(Prefs.LAST_STOP.toString(), ""))

@@ -17,10 +17,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import fhnw.ws6c.R
+import fhnw.ws6c.plantagotchi.AppPreferences
+import fhnw.ws6c.plantagotchi.PlantagotchiApp
 import fhnw.ws6c.plantagotchi.data.GeoPosition
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
+import fhnw.ws6c.plantagotchi.data.connectors.FirebaseConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
+import fhnw.ws6c.plantagotchi.data.state.GameState
 import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +34,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.time.ZonedDateTime
+import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
@@ -43,9 +50,13 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private var accelerometer: Sensor? = null
 
 
-    var statsTitle = "PlantaGotchi Stats"
+    var gameState by mutableStateOf<GameState>(GameState())
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
+    var firebaseConnector = FirebaseConnector(AppPreferences)
+
+    var statsTitle = "PlantaGotchi Stats"
+
 
     private var openWeatherAPIKEY = arrayOf(
         "18b075743cb869bcc0fe9f4977f3696e",
@@ -82,6 +93,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     // Todo: Maybe redesign later
     init {
 
+        Log.d(TAG, "playerId ${AppPreferences.player_id}")
+        firebaseConnector.writeGameState(gameState)
+
+
         setLoader(0, "loading data", true)
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -105,7 +120,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         ) {
             gameLoop()
         }
-
     }
 
 
@@ -116,20 +130,16 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_LIGHT) {
             sensorLux = event.values[0]
-            //Log.d(TAG, "Current lux: $sensorLux")
         }
 
         if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
             accelerometerData = "${event.values[1]}/${event.values[0]}/${event.values[2]}"
-            /*Log.d(
-                TAG, "Accelerometer Change x: ${event.values[1]}, " +
-                        "y: ${event.values[0]}, z: ${event.values[2]}"
-            )*/
         }
     }
 
     fun gameLoop() {
         checkLux()
+        firebaseConnector.updateGameState(gameState)
     }
 
 
@@ -144,10 +154,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             gameLux -= LUX_DECAY
         }
 
-        if (gameLux < 20.0f) {
-            // send notification to user to inform less than 20% of lux
-        }
 
+        gameState.playerState.lux = gameLux.toDouble()
         Log.d(TAG, "GameLux: $gameLux")
     }
 
@@ -175,6 +183,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             onSuccess = {
                 positionData = "${it.latitude},${it.longitude}"
                 position = it
+                gameState.playerState.lastPosition = it
             },
             onFailure = { positionData = "Cannot get current position" },
             onPermissionDenied = {
@@ -188,7 +197,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         loadWeatherData(position.latitude, position.longitude)
         loadSunriseSunsetData(position.latitude, position.longitude)
     }
-
 
     fun getAPIKey(): String {
         return openWeatherAPIKEY[(0 until (openWeatherAPIKEY.size - 1)).random()]
@@ -212,7 +220,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             } catch (e: Exception) {
                 Log.e(TAG, "Error in OpenWeatherCall: $e")
             }
-
         }
     }
 
