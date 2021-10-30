@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. Styling is done inside compose code, not here-->
     <style name="EmobaTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar"/>
 

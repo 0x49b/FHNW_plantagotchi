@@ -1,13 +1,10 @@
 package fhnw.ws6c.plantagotchi.data.connectors
 
-import android.app.Activity
 import android.Manifest
 import android.annotation.SuppressLint
-import androidx.core.app.ActivityCompat
-
+import android.app.Activity
 import android.content.pm.PackageManager
-
-import com.google.android.gms.location.LocationServices
+import androidx.core.app.ActivityCompat
 
 class JSONConnector(val activity: Activity) {
 

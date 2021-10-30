@@ -5,11 +5,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import fhnw.ws6c.plantagotchi.AppPreferences
 import fhnw.ws6c.plantagotchi.data.state.GameState
-import com.google.firebase.firestore.QuerySnapshot
-
-import androidx.annotation.NonNull
-
-import com.google.android.gms.tasks.OnCompleteListener
 
 
 class FirebaseConnector(var appPreferences: AppPreferences) {
@@ -17,8 +12,6 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
     private val TAG = "FirebaseConnector"
     private val db = Firebase.firestore
     private val gameStateTable = "gameState"
-
-
 
 
     fun writeGameState(gameState: GameState) {
@@ -37,7 +30,6 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
                     Log.w(TAG, "Error adding document", e)
                 }
         } else {
-
             db.collection(gameStateTable)
                 .add(gameState.toHashMap())
                 .addOnSuccessListener { documentReference ->
@@ -48,32 +40,31 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
                     Log.w(TAG, "Error adding document", e)
                 }
         }
-
     }
 
-    fun getGameState(): GameState {
-        var gameState = GameState()
-
-        return gameState
+    fun getGameState(gameState: GameState) {
+        db.collection(gameStateTable)
+            .document(appPreferences.player_id)
+            .get().addOnSuccessListener { result ->
+                Log.d(TAG, "playerState.lux ${result.get("playerState.lux")}")
+                gameState.playerState.lux = result.get("playerState.lux") as Double
+            }
     }
 
-    fun updateGameState(gameState: GameState){
-
+    fun updateGameState(gameState: GameState) {
         db.collection(gameStateTable)
             .document(appPreferences.player_id)
             .update(gameState.toHashMap() as Map<String, Any>)
-            .addOnSuccessListener { documentReference ->
-            }
-            .addOnFailureListener { e ->
-            }
-
     }
 
     fun updateGameStateProperty(propertyKey: String, propertyValue: String) {
         db.collection(gameStateTable).document(appPreferences.player_id)
             .update(propertyKey, propertyValue).addOnSuccessListener {
-            Log.d(TAG, "Updated $propertyKey with $propertyValue for ${appPreferences.player_id}")
-        }
+                Log.d(
+                    TAG,
+                    "Updated $propertyKey with $propertyValue for ${appPreferences.player_id}"
+                )
+            }
     }
 
 }

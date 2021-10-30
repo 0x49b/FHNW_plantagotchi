@@ -17,11 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.AppPreferences
-import fhnw.ws6c.plantagotchi.PlantagotchiApp
 import fhnw.ws6c.plantagotchi.data.GeoPosition
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.FirebaseConnector
@@ -34,7 +31,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.time.ZonedDateTime
-import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
@@ -88,14 +84,13 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var sensorLux by mutableStateOf(0.0f)
     var accelerometerData by mutableStateOf("getting xyz")
 
-    var gameLux by mutableStateOf(100.0f)
+    var gameLux by mutableStateOf(100.0)
 
     // Todo: Maybe redesign later
     init {
 
         Log.d(TAG, "playerId ${AppPreferences.player_id}")
         firebaseConnector.writeGameState(gameState)
-
 
         setLoader(0, "loading data", true)
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
@@ -123,6 +118,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     }
 
 
+    fun getGameStateFromFirestore() {
+        firebaseConnector.getGameState(gameState)
+    }
+
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // braucht es aktuell nicht
     }
@@ -145,17 +144,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     fun checkLux() {
         if (sensorLux > 1000) {
-            if (gameLux <= 100.0) {
-                gameLux += 0.1f
+            if (gameState.playerState.lux <= 100.0) {
+                gameState.playerState.lux += 0.1
             } else {
-                gameLux = 100.0f
+                gameState.playerState.lux = 100.0
             }
         } else {
-            gameLux -= LUX_DECAY
+            gameState.playerState.lux -= LUX_DECAY
         }
 
-
-        gameState.playerState.lux = gameLux.toDouble()
         Log.d(TAG, "GameLux: $gameLux")
     }
 

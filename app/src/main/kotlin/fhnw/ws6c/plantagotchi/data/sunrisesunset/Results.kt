@@ -1,7 +1,5 @@
 package fhnw.ws6c.plantagotchi.data.sunrisesunset
 
-import java.time.LocalDateTime
-
 data class Results(
 
     val sunrise: String,

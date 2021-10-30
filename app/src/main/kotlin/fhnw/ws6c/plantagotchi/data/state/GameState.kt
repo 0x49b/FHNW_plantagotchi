@@ -5,9 +5,8 @@ class GameState() {
     var playerState: PlayerState = PlayerState()
 
     fun toHashMap(): HashMap<String, HashMap<String, Any>> {
-        val gameState = hashMapOf(
+        return hashMapOf(
             "playerState" to playerState.toHashMap()
         )
-        return gameState
     }
 }

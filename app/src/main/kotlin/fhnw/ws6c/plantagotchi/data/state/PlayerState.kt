@@ -10,14 +10,12 @@ class PlayerState {
     var lastPosition: GeoPosition = GeoPosition()
 
     fun toHashMap(): HashMap<String, Any> {
-        val playerState = hashMapOf(
+        return hashMapOf(
             "lux" to lux,
             "co2" to co2,
             "love" to love,
             "fertilizer" to fertilizer,
             "lastPosition" to lastPosition
         )
-
-        return playerState
     }
 }

@@ -4,9 +4,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import fhnw.ws6c.plantagotchi.ui.theme.color.PlantagotchiLightColor
 import androidx.compose.ui.graphics.Color
 import fhnw.ws6c.plantagotchi.ui.theme.color.PlantagotchiDarkColor
+import fhnw.ws6c.plantagotchi.ui.theme.color.PlantagotchiLightColor
 
 
 private val appNightColors = Colors(

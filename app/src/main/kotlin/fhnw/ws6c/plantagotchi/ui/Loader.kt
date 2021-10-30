@@ -2,40 +2,26 @@ package fhnw.ws6c.plantagotchi.ui
 
 import android.app.Activity
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import fhnw.ws6c.R
-import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.coil.CoilImage
+import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 
 @Composable
 fun LoadingScreen(model: PlantagotchiModel) {
     with(model) {
 
         Box(modifier = Modifier.fillMaxSize()) {
-
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -43,7 +29,6 @@ fun LoadingScreen(model: PlantagotchiModel) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
                     text = loaderText,
                     style = TextStyle(fontSize = 35.sp),
@@ -51,14 +36,11 @@ fun LoadingScreen(model: PlantagotchiModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
 
-
                 CoilImage(
                     imageModel = loader,
                     contentScale = ContentScale.Crop,
                     circularReveal = CircularReveal(duration = 250)
                 )
-
-
             }
         }
     }
@@ -68,10 +50,6 @@ fun LoadingScreen(model: PlantagotchiModel) {
 @Preview
 @Composable
 fun LoadingScreenPreview() {
-
     val context = LocalContext.current as Activity
-
     LoadingScreen(model = PlantagotchiModel(context as ComponentActivity))
-
-
 }

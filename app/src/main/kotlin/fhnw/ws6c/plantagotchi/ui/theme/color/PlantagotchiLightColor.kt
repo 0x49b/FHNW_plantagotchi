@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
  */
 object PlantagotchiLightColor {
 
-    val SKY = Color(0xffA1ADFF)
+    val SKY = Color(0xff0095E9)
 
     val BROWN = Color(0xffA52A2A)
     val LIGHT_CYAN = Color(0xffE0FFFF)

@@ -14,16 +14,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.skydoves.landscapist.glide.GlideImage
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 
 
 @Composable
-fun AppUI(model: PlantagotchiModel) {
+fun GameUI(model: PlantagotchiModel) {
     with(model) {
 
-        PlantagotchiTheme(darkTheme = dark){
+        PlantagotchiTheme(darkTheme = dark) {
 
             ConstraintLayout(
                 modifier = Modifier
@@ -31,7 +32,31 @@ fun AppUI(model: PlantagotchiModel) {
                     .background(color = MaterialTheme.colors.background)
             ) {
 
-                val (pot, plant, co2, lux, love, pos, weather, dn, stats, lc, luxMeter, accel) = createRefs()
+                val (background, ground, pot, plant, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
+
+
+
+                GlideImage(
+                    imageModel = R.drawable.ic_bg_day,
+                    contentDescription = "background",
+                    modifier = Modifier.constrainAs(background) {
+                        start.linkTo(parent.start, 0.dp)
+                        top.linkTo(parent.top, 0.dp)
+                    }
+                )
+
+                GlideImage(
+                    imageModel = R.drawable.ic_ground,
+                    contentDescription = "ground",
+                    modifier = Modifier
+                        .height(128.dp)
+                        .constrainAs(ground) {
+                            bottom.linkTo(parent.bottom, 0.dp)
+                            start.linkTo(parent.start, 0.dp)
+                        }
+                )
+
+
 
                 Text(
                     text = statsTitle,
@@ -82,8 +107,6 @@ fun AppUI(model: PlantagotchiModel) {
                         end.linkTo(parent.end, 5.dp)
                     })
 
-
-
                 Text(
                     text = "Last update: $lastCheck",
                     style = MaterialTheme.typography.caption,
@@ -93,11 +116,10 @@ fun AppUI(model: PlantagotchiModel) {
                             start.linkTo(parent.end, 5.dp)
                         })
 
-
-
                 Image(painterResource(id = R.drawable.ic_plant2),
                     contentDescription = "the_plant",
                     modifier = Modifier
+                        .fillMaxWidth()
                         .constrainAs(plant) {
                             bottom.linkTo(pot.top, (-2).dp)
                         })
@@ -105,54 +127,62 @@ fun AppUI(model: PlantagotchiModel) {
                 Image(painterResource(id = R.drawable.ic_pot12),
                     contentDescription = "the_pot",
                     modifier = Modifier
+                        .fillMaxWidth()
                         .constrainAs(pot) {
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
+                            bottom.linkTo(ground.top, (-48).dp)
                         })
+                BottomIndicator(
+                    model = model,
+                    modifier = Modifier.constrainAs(bottomBar) {
+                        bottom.linkTo(parent.bottom, 5.dp)
+                    })
 
+            }
+        }
+    }
+}
 
+@Composable
+fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
+    with(model) {
+        Column(modifier = modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp)) {
 
-                Box(contentAlignment = Alignment.Center,
+            Text(
+                text = "What does your plant need?",
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                IndicatorBubble(model, title = "lux", color = Color(0xFFFFEB3B))
+            }
+        }
+    }
+}
+
+@Composable
+fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
+    with(model) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(color, shape = CircleShape)
+                .size(60.dp)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "%.0f".format(gameState.playerState.lux) + "%",
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFF003036),
                     modifier = Modifier
-                        .constrainAs(luxMeter) {
-                            bottom.linkTo(parent.bottom, 5.dp)
-                            end.linkTo(parent.end, 5.dp)
-                        }
-                        .background(Color(0xFFFFEB3B), shape = CircleShape)
-                        .size(90.dp)
-                        /*.layout() { measurable, constraints ->
-                            // Measure the composable
-                            val placeable = measurable.measure(constraints)
-
-                            //get the current max dimension to assign width=height
-                            val currentHeight = placeable.height
-                            var heightCircle = currentHeight
-                            if (placeable.width > heightCircle)
-                                heightCircle = placeable.width
-
-                            //assign the dimension and the center position
-                            layout(heightCircle, heightCircle) {
-                                // Where the composable gets placed
-                                placeable.placeRelative(0, (heightCircle - currentHeight) / 2)
-                            }
-                        }*/) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally){
-
-                        Text(
-                            text = "%.0f".format(gameLux) + "%",
-                            textAlign = TextAlign.Center,
-                            color = Color(0xFF003036),
-                            modifier = Modifier
-                                .padding(6.dp)
-                                .defaultMinSize(30.dp) //Use a min size for short text.
-                        )
-                        Text(
-                            text = "lux",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
+                        .padding(6.dp)
+                        .defaultMinSize(30.dp) //Use a min size for short text.
+                )
+                Text(
+                    text = title,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
