@@ -57,7 +57,6 @@ fun GameUI(model: PlantagotchiModel) {
                 )
 
 
-
                 Text(
                     text = statsTitle,
                     style = MaterialTheme.typography.h5,

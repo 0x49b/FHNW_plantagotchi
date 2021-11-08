@@ -89,6 +89,9 @@ dependencies {
     // Animation
     implementation "androidx.compose.animation:animation:1.1.0-beta01"
 
+    //Promises
+    implementation 'com.shopify.promises:promises:0.0.9'
+
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

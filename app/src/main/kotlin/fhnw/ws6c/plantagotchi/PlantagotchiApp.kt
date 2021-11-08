@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import fhnw.ws6c.EmobaApp
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
-import fhnw.ws6c.plantagotchi.ui.AboutScreen
 import fhnw.ws6c.plantagotchi.ui.GameUI
 
 
@@ -17,14 +16,18 @@ object PlantagotchiApp : EmobaApp {
 
     override fun initialize(activity: ComponentActivity) {
         AppPreferences.init(activity)
-        model = PlantagotchiModel(activity)
-        if (AppPreferences.contains("PLAYER_ID") &&
-            AppPreferences.player_id.isNotBlank() &&
-            AppPreferences.player_id.isNotEmpty()
+
+        if (!AppPreferences.contains("PLAYER_ID") &&
+            AppPreferences.player_id.isBlank() &&
+            AppPreferences.player_id.isEmpty()
         ) {
-            model.getGameStateFromFirestore()
+            model = PlantagotchiModel(activity)
+            model.createNewGameStateInFirebase()
+            //todo then show loader
+        } else {
+            model = PlantagotchiModel(activity)
+            // todo show loader
         }
-        // Todo load here gameState (maybe)
     }
 
     @Composable

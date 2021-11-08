@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
+import com.shopify.promises.Promise
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.AppPreferences
 import fhnw.ws6c.plantagotchi.data.GeoPosition
@@ -46,7 +47,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private var accelerometer: Sensor? = null
 
 
-    var gameState by mutableStateOf<GameState>(GameState())
+    var gameState by mutableStateOf(GameState())
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
     var firebaseConnector = FirebaseConnector(AppPreferences)
@@ -71,8 +72,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      * Decays for LUX, CO2, WATER, FERTILIZER
      */
     val LUX_DECAY = 100.0f / 86400.0f // 100 percent / 867400 seconds
-    val WATER_DECAY = 0.1f
-    val FERTILIZER_DECAY = 0.1f
 
 
     var positionData by mutableStateOf("Getting position ...")
@@ -90,9 +89,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     init {
 
         Log.d(TAG, "playerId ${AppPreferences.player_id}")
-        firebaseConnector.writeGameState(gameState)
 
-        setLoader(0, "loading data", true)
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
@@ -107,24 +104,41 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             dataLoop()
         }
 
-        fixedRateTimer(
-            name = "plantagotchi-game-loop",
-            initialDelay = 0,
-            period = 1000,
-            daemon = true
-        ) {
-            gameLoop()
-        }
+        firebaseConnector
+            .loadInitialGameState
+            .whenComplete {
+                when (it) {
+                    is Promise.Result.Success -> {
+                        gameState = it.value
+
+                        fixedRateTimer(
+                            name = "plantagotchi-game-loop",
+                            initialDelay = 0,
+                            period = 1000,
+                            daemon = true
+                        ) {
+                            gameLoop()
+                        }
+
+                    }
+                    is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
+                }
+            }
+
+
     }
 
 
-    fun getGameStateFromFirestore() {
-        firebaseConnector.getGameState(gameState)
+    fun createNewGameStateInFirebase() {
+        gameState.playerState.lux = 100.0
+        gameState.playerState.love = 100.0
+        gameState.playerState.co2 = 100.0
+        gameState.playerState.fertilizer = 100.0
+        firebaseConnector.createNewGameState(gameState)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        // braucht es aktuell nicht
-    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_LIGHT) {

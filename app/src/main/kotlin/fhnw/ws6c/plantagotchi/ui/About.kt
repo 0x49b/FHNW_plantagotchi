@@ -44,12 +44,12 @@ fun AboutScreen() {
             )
 
             GlideImage(
-                imageModel = R.drawable.ic_team_rocket,
+                imageModel = R.drawable.ic_teamrocket,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(64.dp)
                     .constrainAs(teamrocket) {
-                        bottom.linkTo(ground.top, (-5).dp)
+                        bottom.linkTo(ground.top)
                     }
             )
 
@@ -86,7 +86,6 @@ fun AboutScreen() {
         }
     }
 }
-
 
 @Preview
 @Composable
