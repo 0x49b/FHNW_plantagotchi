@@ -16,26 +16,13 @@ object PlantagotchiApp : EmobaApp {
 
     override fun initialize(activity: ComponentActivity) {
         AppPreferences.init(activity)
-
-        if (!AppPreferences.contains("PLAYER_ID") &&
-            AppPreferences.player_id.isBlank() &&
-            AppPreferences.player_id.isEmpty()
-        ) {
-            model = PlantagotchiModel(activity)
-            model.createNewGameStateInFirebase()
-            //todo then show loader
-        } else {
-            model = PlantagotchiModel(activity)
-            // todo show loader
-        }
+        model = PlantagotchiModel(activity)
+        //model.appStartup()
     }
 
     @Composable
     override fun CreateUI() {
-        with(model) {
-            GameUI(model)
-            // AboutScreen()
-        }
+        GameUI(model)
     }
 }
 

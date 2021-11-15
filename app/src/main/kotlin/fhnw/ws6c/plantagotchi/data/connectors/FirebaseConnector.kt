@@ -16,6 +16,7 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
     private val gameStateTable = "gameState"
 
 
+
     //Todo needs refactoring
     fun createNewGameState(gameState: GameState) {
         db.collection(gameStateTable)
@@ -34,6 +35,18 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
             .document(appPreferences.player_id)
             .update(gameState.toHashMap() as Map<String, Any>)
     }
+
+    /*val createNewGameStatePromise = Promise<GameState, Exception>{ gameState ->
+        db.collection(gameStateTable)
+            .add(gameState.toHashMap())
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "GameState created for ${documentReference.id}")
+                appPreferences.player_id = documentReference.id
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding document", e)
+            }
+    }*/
 
     val loadInitialGameState = Promise<GameState, Exception> {
         db.collection(gameStateTable)

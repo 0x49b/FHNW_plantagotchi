@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
+import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.shopify.promises.Promise
 import fhnw.ws6c.R
@@ -25,13 +26,17 @@ import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.FirebaseConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
 import fhnw.ws6c.plantagotchi.data.state.GameState
-import fhnw.ws6c.plantagotchi.data.sunrisesunset.SunriseSunset
+import fhnw.ws6c.plantagotchi.data.weather.CurrentWeather
+import fhnw.ws6c.plantagotchi.data.weather.WeatherFacts
+import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.net.URL
-import java.time.ZonedDateTime
+import java.time.*
+import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
 
@@ -51,7 +56,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
     var firebaseConnector = FirebaseConnector(AppPreferences)
-
     var statsTitle = "PlantaGotchi Stats"
 
 
@@ -60,7 +64,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         "89256d338d3202fa44b7deac9b0c208a",
         "1abd7b50c169e42776138698accfefc8",
         "a04c01f715bebacc9295dcf9f22acf12",
-        "3867fa45c8569be5ce88e0337c5beba5"
+        "3867fa45c8569be5ce88e0337c5beba5",
+        "7b01cceea663181163db89f3af7e84eb"
     )
 
     var loader by mutableStateOf<Drawable?>(null)
@@ -76,65 +81,27 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     var positionData by mutableStateOf("Getting position ...")
     var position by mutableStateOf(GeoPosition())
+
     var currentWeather by mutableStateOf("Getting current weather ...")
+
     var nightDay by mutableStateOf("Checking Night or Day ...")
     var dark by mutableStateOf(false)
     var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var sensorLux by mutableStateOf(0.0f)
     var accelerometerData by mutableStateOf("getting xyz")
 
-    var gameLux by mutableStateOf(100.0)
+    var gameLux by mutableStateOf(0.0)
 
-    // Todo: Maybe redesign later
+    var cWeather by mutableStateOf(CurrentWeather.getDefault())
+
+
     init {
-
-        Log.d(TAG, "playerId ${AppPreferences.player_id}")
-
         brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
 
-        fixedRateTimer(
-            name = "plantagotchi-data-loop",
-            initialDelay = 0,
-            period = 60000,
-            daemon = true
-        ) {
-            dataLoop()
-        }
-
-        firebaseConnector
-            .loadInitialGameState
-            .whenComplete {
-                when (it) {
-                    is Promise.Result.Success -> {
-                        gameState = it.value
-
-                        fixedRateTimer(
-                            name = "plantagotchi-game-loop",
-                            initialDelay = 0,
-                            period = 1000,
-                            daemon = true
-                        ) {
-                            gameLoop()
-                        }
-
-                    }
-                    is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
-                }
-            }
-
-
-    }
-
-
-    fun createNewGameStateInFirebase() {
-        gameState.playerState.lux = 100.0
-        gameState.playerState.love = 100.0
-        gameState.playerState.co2 = 100.0
-        gameState.playerState.fertilizer = 100.0
-        firebaseConnector.createNewGameState(gameState)
+        dataLoop()
     }
 
 
@@ -206,66 +173,150 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             }
         )
         loadWeatherData(position.latitude, position.longitude)
-        loadSunriseSunsetData(position.latitude, position.longitude)
     }
 
-    fun getAPIKey(): String {
-        return openWeatherAPIKEY[(0 until (openWeatherAPIKEY.size - 1)).random()]
+    private fun getAPIKey(): String {
+        return openWeatherAPIKEY[(0 until (openWeatherAPIKEY.size)).random()]
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun loadWeatherData(latitude: Double, longitude: Double) {
+    private fun loadWeatherData(latitude: Double, longitude: Double) {
+
+        val urlString =
+            "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=${getAPIKey()}"
+
         modelScope.launch {
-            val urlString =
-                "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&exclude=daily,minutely,hourly,alerts&appid=${getAPIKey()}"
+
             val url = URL(urlString)
             val weatherJSON = apiConnector.getJSONString(url)
+            val weatherJSONObject = JSONObject(weatherJSON)
+            val currentWeather = weatherJSONObject.getJSONObject("current")
+            //val minutelyWeather = weatherJSONObject.getJSONArray("minutely")[0]
+            val dailyWeather = weatherJSONObject.getJSONArray("daily")[0]
+            //val dailyWeatherTemp = dailyWeather.getJSONObject("temp")
             Log.d(TAG, weatherJSON)
 
-            try {
+            Log.d(TAG, "current temp from new loader ${currentWeather.getLong("temp")}")
+
+            val weatherFacts = WeatherFacts(
+                temperature = currentWeather.getLong("temp").toFloat(),
+                apparentTemperature = currentWeather.getLong("feels_like").toInt(),
+                precipitation = 0.0F,//minutelyWeather.getLong("precipitation").toFloat(),
+                humidity = currentWeather.getLong("humidity").toFloat(),
+                windSpeed = currentWeather.getLong("wind_speed").toFloat(),
+                cloudCover = currentWeather.getLong("clouds").toFloat(),
+                pressure = currentWeather.getLong("pressure").toFloat(),
+                visibility = currentWeather.getLong("visibility").toFloat(),
+                uvIndex = currentWeather.getLong("uvi").toInt(),
+                dewPoint = currentWeather.getLong("dew_point").toInt(),
+                state = WeatherState.CLEAR_SKY
+            )
+
+            cWeather = CurrentWeather(
+                time = Calendar.getInstance().time,
+                hourWeather = weatherFacts,
+                sunrise = currentWeather.getString("sunrise"),
+                sunset = currentWeather.getString("sunset"),
+                minTemperature = 0,//dailyWeatherTemp.getInt("min"),
+                maxTemperature = 0,//dailyWeatherTemp.getInt("max")
+
+            )
+
+            /*try {
                 val weather = Klaxon().parse<Base>(weatherJSON)
                 Log.d(TAG, weather.toString())
                 if (weather != null) {
                     currentWeather = weather.current.weather[0].description
+                    calculateDayOrNight(
+                        (weather.current.sunrise).toLong(),
+                        (weather.current.sunset).toLong()
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in OpenWeatherCall: $e")
-            }
+            }*/
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun loadSunriseSunsetData(latitude: Double, longitude: Double) {
-        modelScope.launch {
-            val url =
-                URL("https://api.sunrise-sunset.org/json?lat=$latitude&lng=-$longitude&formatted=0")
-            val sunriseSunsetJSON = apiConnector.getJSONString(url)
-            Log.d(TAG, sunriseSunsetJSON)
 
-            try {
+    fun calculateDayOrNight(sunriseTimestamp: Long, sunsetTimestamp: Long) {
 
-                val sunriseSunset = Klaxon().parse<SunriseSunset>(sunriseSunsetJSON)
-                Log.d(TAG, sunriseSunset.toString())
+        val sunrise = Instant
+            .ofEpochSecond(sunriseTimestamp)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+        val sunset =
+            Instant
+                .ofEpochSecond(sunsetTimestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
 
-                if (sunriseSunset != null) {
+        val currentDateTime = ZonedDateTime.now().toLocalDateTime()
 
-                    val sunrise = ZonedDateTime.parse(sunriseSunset.results.sunrise)
-                    val sunset = ZonedDateTime.parse(sunriseSunset.results.sunset)
-                    val currentDateTime = ZonedDateTime.now()
+        lastCheck = currentDateTime.toString()
 
-                    lastCheck = currentDateTime.toString()
-
-                    if (currentDateTime > sunrise && currentDateTime < sunset) {
-                        nightDay = "We are in daylight"
-                        dark = false
-                    } else {
-                        nightDay = "It's nighttime"
-                        dark = true
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in SunriseSunset Call: $e")
-            }
+        if (currentDateTime > sunrise && currentDateTime < sunset) {
+            nightDay = "We are in daylight"
+            dark = false
+        } else {
+            nightDay = "It's nighttime"
+            dark = true
         }
+    }
+
+    fun appStartup() {
+        /*fixedRateTimer(
+            name = "plantagotchi-data-loop",
+            initialDelay = 0,
+            period = 60000,
+            daemon = true
+        ) {
+            dataLoop()
+        }*/
+
+        if (isPlayerSet()) {
+            loadGameState()
+        } else {
+            createNewGameState()
+            //loadGameState()
+        }
+    }
+
+    fun loadGameState() {
+        firebaseConnector
+            .loadInitialGameState
+            .whenComplete {
+                when (it) {
+                    is Promise.Result.Success -> {
+                        gameState = it.value
+                        fixedRateTimer(
+                            name = "plantagotchi-game-loop",
+                            initialDelay = 0,
+                            period = 1000,
+                            daemon = true
+                        ) {
+                            gameLoop()
+                        }
+                    }
+                    is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
+                }
+            }
+    }
+
+    fun createNewGameState() {
+        gameState.playerState.lux = 100.0
+        gameState.playerState.love = 100.0
+        gameState.playerState.co2 = 100.0
+        gameState.playerState.fertilizer = 100.0
+        gameState.playerState.lastPosition = position
+        firebaseConnector.createNewGameState(gameState)
+    }
+
+
+    private fun isPlayerSet(): Boolean {
+        val playerIsSet = AppPreferences.contains("PLAYER_ID") &&
+                AppPreferences.player_id.isNotBlank() &&
+                AppPreferences.player_id.isNotEmpty()
+        Log.d(TAG, "playerIsSet: $playerIsSet")
+        return playerIsSet
     }
 }
