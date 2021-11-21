@@ -3,7 +3,6 @@ package fhnw.ws6c.plantagotchi.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +31,7 @@ fun GameUI(model: PlantagotchiModel) {
                     .background(color = MaterialTheme.colors.background)
             ) {
 
-                val (background, ground, pot, plant, chest, coin, coin_counter, weather, dn, stats, lc, bottomBar, accel) = createRefs()
+                val (background, ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()
 
 
 
@@ -80,79 +79,6 @@ fun GameUI(model: PlantagotchiModel) {
                         }
                 )
 
-
-
-
-         /*       GlideImage(
-                    imageModel = R.drawable.chest,
-                    contentDescription = "chest",
-                    modifier = Modifier
-                        .height(128.dp)
-                        .constrainAs(ground) {
-                            end.linkTo(parent.end, 5.dp)
-                            top.linkTo(parent.top, 5.dp)
-                        }
-                )*/
-
-
-                /*Text(
-                    text = statsTitle,
-                    style = MaterialTheme.typography.h5,
-                    modifier = Modifier.constrainAs(stats) {
-                        end.linkTo(parent.end, 5.dp)
-                        top.linkTo(parent.top, 5.dp)
-                    })
-
-                Text(
-                    text = positionData,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(pos) {
-                        end.linkTo(parent.end, 5.dp)
-                        top.linkTo(stats.bottom, 5.dp)
-                    }
-                )
-
-                Text(
-                    text = currentWeather,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(weather) {
-                        top.linkTo(pos.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = nightDay,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(dn) {
-                        top.linkTo(weather.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = "$sensorLux lux",
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(lux) {
-                        top.linkTo(dn.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = accelerometerData,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(accel) {
-                        top.linkTo(lux.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = "Last update: $lastCheck",
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier
-                        .constrainAs(lc) {
-                            top.linkTo(accel.bottom, 1.dp)
-                            start.linkTo(parent.end, 5.dp)
-                        })*/
-
                 Image(painterResource(id = R.drawable.ic_plant2),
                     contentDescription = "the_plant",
                     modifier = Modifier
@@ -189,6 +115,7 @@ fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
+
             )
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -204,23 +131,82 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .background(color, shape = CircleShape)
-                .size(60.dp)
+                .padding(start=30.dp)
+
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "%.0f".format(gameState.playerState.lux) + "%",
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFF003036),
+
+                Image(painterResource(id = R.drawable.button_love),
+                    contentDescription = "button_love",
                     modifier = Modifier
-                        .padding(6.dp)
-                        .defaultMinSize(30.dp) //Use a min size for short text.
+                        .size(65.dp)
                 )
-                Text(
-                    text = title,
-                    textAlign = TextAlign.Center
-                )
-            }
+
+            Image(painterResource(id = R.drawable.heart),
+                contentDescription = "heart",
+                modifier = Modifier
+                    .size(25.dp)
+            )
+
         }
+
+    Box(
+        contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(start=20.dp)
+    ) {
+
+        Image(painterResource(id = R.drawable.button_fertilizer),
+            contentDescription = "button_fertilizer",
+            modifier = Modifier
+                .size(65.dp)
+        )
+
+        Image(painterResource(id = R.drawable.fertilizer),
+            contentDescription = "fertilizer",
+            modifier = Modifier
+                .size(25.dp)
+        )
+
     }
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(start=20.dp)
+        ) {
+
+            Image(painterResource(id = R.drawable.button_water),
+                contentDescription = "button_water",
+                modifier = Modifier
+                    .size(65.dp)
+            )
+
+            Image(painterResource(id = R.drawable.water),
+                contentDescription = "water",
+                modifier = Modifier
+                    .size(25.dp)
+            )
+
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
+           modifier = Modifier
+               .padding(start=20.dp)
+        ) {
+
+            Image(painterResource(id = R.drawable.button_sunshine),
+                contentDescription = "button_sunshine",
+                modifier = Modifier
+                    .size(65.dp)
+            )
+
+            Image(painterResource(id = R.drawable.sunshine),
+                contentDescription = "sunshine",
+                modifier = Modifier
+                    .size(25.dp)
+            )
+
+        }
+}
 }
