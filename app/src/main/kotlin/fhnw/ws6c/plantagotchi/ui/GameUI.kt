@@ -32,7 +32,7 @@ fun GameUI(model: PlantagotchiModel) {
                     .background(color = MaterialTheme.colors.background)
             ) {
 
-                val (background, ground, pot, plant, chest, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
+                val (background, ground, pot, plant, chest, coin, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
 
 
 
@@ -68,6 +68,17 @@ fun GameUI(model: PlantagotchiModel) {
                             }
                     )
 
+                Image(
+                    painter = painterResource(id = R.drawable.coin),
+                    contentDescription = "coin",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .fillMaxWidth()
+                        .constrainAs(coin) {
+                            top.linkTo(parent.top, 5.dp)
+                            //Todo add Abstand
+                        }
+                )
 
 
          /*       GlideImage(
