@@ -32,7 +32,7 @@ fun GameUI(model: PlantagotchiModel) {
                     .background(color = MaterialTheme.colors.background)
             ) {
 
-                val (background, ground, pot, plant, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
+                val (background, ground, pot, plant, chest, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
 
 
 
@@ -56,8 +56,33 @@ fun GameUI(model: PlantagotchiModel) {
                         }
                 )
 
+                    Image(
+                        painter = painterResource(id = R.drawable.chest),
+                        contentDescription = "chest",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .fillMaxWidth()
+                            .constrainAs(chest) {
+                                end.linkTo(parent.end, 5.dp)
+                                top.linkTo(parent.top, 5.dp)
+                            }
+                    )
 
-                Text(
+
+
+         /*       GlideImage(
+                    imageModel = R.drawable.chest,
+                    contentDescription = "chest",
+                    modifier = Modifier
+                        .height(128.dp)
+                        .constrainAs(ground) {
+                            end.linkTo(parent.end, 5.dp)
+                            top.linkTo(parent.top, 5.dp)
+                        }
+                )*/
+
+
+                /*Text(
                     text = statsTitle,
                     style = MaterialTheme.typography.h5,
                     modifier = Modifier.constrainAs(stats) {
@@ -113,7 +138,7 @@ fun GameUI(model: PlantagotchiModel) {
                         .constrainAs(lc) {
                             top.linkTo(accel.bottom, 1.dp)
                             start.linkTo(parent.end, 5.dp)
-                        })
+                        })*/
 
                 Image(painterResource(id = R.drawable.ic_plant2),
                     contentDescription = "the_plant",
