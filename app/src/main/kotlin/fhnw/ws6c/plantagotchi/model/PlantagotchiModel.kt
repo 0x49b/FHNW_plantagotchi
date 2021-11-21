@@ -1,6 +1,5 @@
 package fhnw.ws6c.plantagotchi.model
 
-import Base
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,8 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Klaxon
 import com.shopify.promises.Promise
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.AppPreferences
@@ -32,10 +29,14 @@ import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URL
-import java.time.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -44,30 +45,48 @@ import kotlin.concurrent.fixedRateTimer
 class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     SensorEventListener {
 
+
+    /**
+     * Weather Things clean up
+     */
+
+    var oldSelectedWeatherTime: Date = Date()
+    private val _particleAnimationIteration = MutableStateFlow(0L)
+    val particleAnimationIteration: StateFlow<Long> = _particleAnimationIteration
+
+
+
+    /**
+     * Generic Stuff
+     */
     private val TAG = "PlantaGotchiModel"
     private val modelScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * Sensor Stuff
+     */
     private var sensorManager: SensorManager =
         activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
     private var accelerometer: Sensor? = null
 
 
-    var gameState by mutableStateOf(GameState())
+    /**
+     * Init of Connectors
+     */
     var gpsConnector = GPSConnector(activity)
     var apiConnector = ApiConnector()
     var firebaseConnector = FirebaseConnector(AppPreferences)
     var statsTitle = "PlantaGotchi Stats"
 
+    /**
+     * GameState Object
+     */
+    var gameState by mutableStateOf(GameState())
 
-    private var openWeatherAPIKEY = arrayOf(
-        "18b075743cb869bcc0fe9f4977f3696e",
-        "89256d338d3202fa44b7deac9b0c208a",
-        "1abd7b50c169e42776138698accfefc8",
-        "a04c01f715bebacc9295dcf9f22acf12",
-        "3867fa45c8569be5ce88e0337c5beba5",
-        "7b01cceea663181163db89f3af7e84eb"
-    )
-
+    /**
+     * Loader vars when the Game Starts
+     */
     var loader by mutableStateOf<Drawable?>(null)
     var loading by mutableStateOf(true)
     var loaderText by mutableStateOf("Loading Plantagotchi")
@@ -78,21 +97,28 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      */
     val LUX_DECAY = 100.0f / 86400.0f // 100 percent / 867400 seconds
 
-
+    /**
+     * Position Objects
+     */
     var positionData by mutableStateOf("Getting position ...")
     var position by mutableStateOf(GeoPosition())
 
+    /**
+     * Weather Objects
+     */
+    var cWeather by mutableStateOf(CurrentWeather.getDefault())
     var currentWeather by mutableStateOf("Getting current weather ...")
 
+
+    /**
+     * Currently used in the Frontend, can be removed afterwards (before MVP)
+     */
     var nightDay by mutableStateOf("Checking Night or Day ...")
     var dark by mutableStateOf(false)
     var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var sensorLux by mutableStateOf(0.0f)
     var accelerometerData by mutableStateOf("getting xyz")
-
     var gameLux by mutableStateOf(0.0)
-
-    var cWeather by mutableStateOf(CurrentWeather.getDefault())
 
 
     init {
@@ -101,29 +127,35 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_FASTEST)
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
 
+        // Todo Change this
         dataLoop()
     }
 
 
+    /**
+     * Sensor Section, Just to get the newest Sensor Values
+     */
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_LIGHT) {
             sensorLux = event.values[0]
         }
-
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            accelerometerData = "${event.values[1]}/${event.values[0]}/${event.values[2]}"
-        }
     }
 
-    fun gameLoop() {
+    /**
+     * The GameLoop to calculate all the Data for the Plantagotchi Experience
+     */
+    private fun gameLoop() {
         checkLux()
         firebaseConnector.updateGameState(gameState)
     }
 
 
-    fun checkLux() {
+    /**
+     * Calculate Lux Decay or Increase based on current sensor value
+     */
+    private fun checkLux() {
         if (sensorLux > 1000) {
             if (gameState.playerState.lux <= 100.0) {
                 gameState.playerState.lux += 0.1
@@ -137,7 +169,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         Log.d(TAG, "GameLux: $gameLux")
     }
 
-
+    /**
+     * Loader Animation
+     */
     fun setLoader(percent: Int, message: String, running: Boolean) {
         loading = running
         loaderText = "$message"
@@ -156,7 +190,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    fun dataLoop() {
+    /**
+     * Data Loop to get POsition and Weather Data on a regular Basis
+     */
+    private fun dataLoop() {
         gpsConnector.getLocation(
             onSuccess = {
                 positionData = "${it.latitude},${it.longitude}"
@@ -175,10 +212,24 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         loadWeatherData(position.latitude, position.longitude)
     }
 
+    /**
+     * Just some Helper Method to deal with the OpenWeather API Keys
+     */
     private fun getAPIKey(): String {
+        val openWeatherAPIKEY = arrayOf(
+            "18b075743cb869bcc0fe9f4977f3696e",
+            "89256d338d3202fa44b7deac9b0c208a",
+            "1abd7b50c169e42776138698accfefc8",
+            "a04c01f715bebacc9295dcf9f22acf12",
+            "3867fa45c8569be5ce88e0337c5beba5",
+            "7b01cceea663181163db89f3af7e84eb"
+        )
         return openWeatherAPIKEY[(0 until (openWeatherAPIKEY.size)).random()]
     }
 
+    /**
+     * Load Current Weather Data from Openweathermap for a specific position
+     */
     private fun loadWeatherData(latitude: Double, longitude: Double) {
 
         val urlString =
@@ -210,7 +261,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
                 state = WeatherState.CLEAR_SKY
             )
-
             cWeather = CurrentWeather(
                 time = Calendar.getInstance().time,
                 hourWeather = weatherFacts,
@@ -218,49 +268,28 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 sunset = currentWeather.getString("sunset"),
                 minTemperature = 0,//dailyWeatherTemp.getInt("min"),
                 maxTemperature = 0,//dailyWeatherTemp.getInt("max")
-
             )
 
-            /*try {
-                val weather = Klaxon().parse<Base>(weatherJSON)
-                Log.d(TAG, weather.toString())
-                if (weather != null) {
-                    currentWeather = weather.current.weather[0].description
-                    calculateDayOrNight(
-                        (weather.current.sunrise).toLong(),
-                        (weather.current.sunset).toLong()
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in OpenWeatherCall: $e")
-            }*/
+            calculateDayOrNight(cWeather.sunrise.toLong(), cWeather.sunset.toLong())
+
         }
     }
 
-
-    fun calculateDayOrNight(sunriseTimestamp: Long, sunsetTimestamp: Long) {
-
+    /**
+     * Check if it is Night or Day
+     */
+    private fun calculateDayOrNight(sunriseTimestamp: Long, sunsetTimestamp: Long) {
         val sunrise = Instant
             .ofEpochSecond(sunriseTimestamp)
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
-        val sunset =
-            Instant
-                .ofEpochSecond(sunsetTimestamp)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-
+        val sunset = Instant
+            .ofEpochSecond(sunsetTimestamp)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
         val currentDateTime = ZonedDateTime.now().toLocalDateTime()
-
         lastCheck = currentDateTime.toString()
-
-        if (currentDateTime > sunrise && currentDateTime < sunset) {
-            nightDay = "We are in daylight"
-            dark = false
-        } else {
-            nightDay = "It's nighttime"
-            dark = true
-        }
+        dark = !(currentDateTime > sunrise && currentDateTime < sunset)
     }
 
     fun appStartup() {

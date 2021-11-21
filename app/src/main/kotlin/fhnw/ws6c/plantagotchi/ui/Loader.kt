@@ -13,9 +13,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.skydoves.landscapist.CircularReveal
-import com.skydoves.landscapist.coil.CoilImage
+import coil.compose.rememberImagePainter
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
+import androidx.compose.foundation.Image
 
 @Composable
 fun LoadingScreen(model: PlantagotchiModel) {
@@ -36,10 +36,11 @@ fun LoadingScreen(model: PlantagotchiModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                CoilImage(
-                    imageModel = loader,
+                Image(
+                    painter = rememberImagePainter(loader),
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    circularReveal = CircularReveal(duration = 250)
+                    //circularReveal = CircularReveal(duration = 250)
                 )
             }
         }

@@ -6,7 +6,6 @@ import com.google.firebase.ktx.Firebase
 import com.shopify.promises.Promise
 import fhnw.ws6c.plantagotchi.AppPreferences
 import fhnw.ws6c.plantagotchi.data.state.GameState
-import java.lang.RuntimeException
 
 
 class FirebaseConnector(var appPreferences: AppPreferences) {

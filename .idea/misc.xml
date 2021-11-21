@@ -4,10 +4,40 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/compose-model-1633966763562.xml" value="0.33" />
+        <entry key="../../../../layout/compose-model-1635328212778.xml" value="0.30447635135135137" />
+        <entry key="../../../../layout/compose-model-1635328242947.xml" value="0.30447635135135137" />
+        <entry key="../../../../layout/compose-model-1635328268313.xml" value="0.30447635135135137" />
+        <entry key="../../../../layout/compose-model-1635329183382.xml" value="0.30447635135135137" />
+        <entry key="../../../../layout/compose-model-1635363991914.xml" value="0.25" />
+        <entry key="../../../../layout/compose-model-1635581950244.xml" value="0.45" />
+        <entry key="../../../../layout/compose-model-1635763655405.xml" value="0.335" />
+        <entry key="../../../../layout/compose-model-1635773261585.xml" value="0.9490909090909091" />
+        <entry key="../../../../layout/compose-model-1636988740997.xml" value="0.2953703703703704" />
+        <entry key="../../../../layout/compose-model-1636989694118.xml" value="0.275" />
+        <entry key="../../../../layout/compose-model-1636992704980.xml" value="0.1648148148148148" />
+        <entry key="../../../../layout/compose-model-1637267825031.xml" value="0.4691722972972973" />
+        <entry key="../../../../layout/compose-model-1637516015535.xml" value="0.30489864864864863" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.19074074074074074" />
+        <entry key="app/src/main/res/drawable/ic_bg_about.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_button_bg.xml" value="0.3815" />
+        <entry key="app/src/main/res/drawable/ic_cloudy.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_day_cloudy.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_day_fog.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_day_rain.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_day_showers.xml" value="0.1355" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_logo.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_night_alt_cloudy.xml" value="0.1205" />
+        <entry key="app/src/main/res/drawable/ic_night_alt_partly_cloudy.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_night_clear.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_night_fog.xml" value="0.1355" />
         <entry key="app/src/main/res/drawable/ic_pot11.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_pot12.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_rain.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_sunny.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/ic_team_rocket.xml" value="0.3707692307692308" />
+        <entry key="app/src/main/res/drawable/ic_teamrocket.xml" value="0.243" />
+        <entry key="app/src/main/res/drawable/splash_screen_background.xml" value="0.1" />
         <entry key="app/src/main/res/font/pixelmix.xml" value="0.1" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.19074074074074074" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.19074074074074074" />

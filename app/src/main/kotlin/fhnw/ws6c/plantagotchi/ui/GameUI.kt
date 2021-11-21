@@ -14,128 +14,142 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.skydoves.landscapist.glide.GlideImage
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
+import fhnw.ws6c.plantagotchi.ui.particlesystem.Particles
+import fhnw.ws6c.plantagotchi.ui.particlesystem.snowParameters
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
+import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
 
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun GameUI(model: PlantagotchiModel) {
     with(model) {
+        ProvideWindowInsets {
+            PlantagotchiTheme(darkTheme = dark) {
 
-        PlantagotchiTheme(darkTheme = dark) {
+                Box(modifier = Modifier.fillMaxSize()) {
 
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = MaterialTheme.colors.background)
-            ) {
+                    DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
 
-                val (background, ground, pot, plant, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
+                    ConstraintLayout(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = MaterialTheme.colors.background)
+                    ) {
+
+                        val (background, ground, pot, plant, lux, pos, weather, dn, stats, lc, bottomBar, accel) = createRefs()
 
 
 
-                GlideImage(
-                    imageModel = R.drawable.ic_bg_day,
-                    contentDescription = "background",
-                    modifier = Modifier.constrainAs(background) {
-                        start.linkTo(parent.start, 0.dp)
-                        top.linkTo(parent.top, 0.dp)
+                        Image(
+                            painter = rememberImagePainter(R.drawable.ic_bg_day),
+                            contentDescription = "background",
+                            modifier = Modifier.constrainAs(background) {
+                                start.linkTo(parent.start, 0.dp)
+                                top.linkTo(parent.top, 0.dp)
+                            }
+                        )
+
+                        Image(
+                            painter =  rememberImagePainter(R.drawable.ic_ground),
+                            contentDescription = "ground",
+                            modifier = Modifier
+                                .height(128.dp)
+                                .constrainAs(ground) {
+                                    bottom.linkTo(parent.bottom, 0.dp)
+                                    start.linkTo(parent.start, 0.dp)
+                                }
+                        )
+
+
+                        Text(
+                            text = statsTitle,
+                            style = MaterialTheme.typography.h5,
+                            modifier = Modifier.constrainAs(stats) {
+                                end.linkTo(parent.end, 5.dp)
+                                top.linkTo(parent.top, 5.dp)
+                            })
+
+                        Text(
+                            text = positionData,
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.constrainAs(pos) {
+                                end.linkTo(parent.end, 5.dp)
+                                top.linkTo(stats.bottom, 5.dp)
+                            }
+                        )
+
+                        Text(
+                            text = currentWeather,
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.constrainAs(weather) {
+                                top.linkTo(pos.bottom, 1.dp)
+                                end.linkTo(parent.end, 5.dp)
+                            })
+
+                        Text(
+                            text = nightDay,
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.constrainAs(dn) {
+                                top.linkTo(weather.bottom, 1.dp)
+                                end.linkTo(parent.end, 5.dp)
+                            })
+
+                        Text(
+                            text = "$sensorLux lux",
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.constrainAs(lux) {
+                                top.linkTo(dn.bottom, 1.dp)
+                                end.linkTo(parent.end, 5.dp)
+                            })
+
+                        Text(
+                            text = accelerometerData,
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.constrainAs(accel) {
+                                top.linkTo(lux.bottom, 1.dp)
+                                end.linkTo(parent.end, 5.dp)
+                            })
+
+                        Text(
+                            text = "Last update: $lastCheck",
+                            style = MaterialTheme.typography.caption,
+                            modifier = Modifier
+                                .constrainAs(lc) {
+                                    top.linkTo(accel.bottom, 1.dp)
+                                    start.linkTo(parent.end, 5.dp)
+                                })
+
+                        Image(painterResource(id = R.drawable.ic_plant2),
+                            contentDescription = "the_plant",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(plant) {
+                                    bottom.linkTo(pot.top, (-2).dp)
+                                })
+
+                        Image(painterResource(id = R.drawable.ic_pot12),
+                            contentDescription = "the_pot",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(pot) {
+                                    bottom.linkTo(ground.top, (-48).dp)
+                                })
+                        BottomIndicator(
+                            model = model,
+                            modifier = Modifier.constrainAs(bottomBar) {
+                                bottom.linkTo(parent.bottom, 5.dp)
+                            })
+
                     }
-                )
 
-                GlideImage(
-                    imageModel = R.drawable.ic_ground,
-                    contentDescription = "ground",
-                    modifier = Modifier
-                        .height(128.dp)
-                        .constrainAs(ground) {
-                            bottom.linkTo(parent.bottom, 0.dp)
-                            start.linkTo(parent.start, 0.dp)
-                        }
-                )
-
-
-                Text(
-                    text = statsTitle,
-                    style = MaterialTheme.typography.h5,
-                    modifier = Modifier.constrainAs(stats) {
-                        end.linkTo(parent.end, 5.dp)
-                        top.linkTo(parent.top, 5.dp)
-                    })
-
-                Text(
-                    text = positionData,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(pos) {
-                        end.linkTo(parent.end, 5.dp)
-                        top.linkTo(stats.bottom, 5.dp)
-                    }
-                )
-
-                Text(
-                    text = currentWeather,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(weather) {
-                        top.linkTo(pos.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = nightDay,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(dn) {
-                        top.linkTo(weather.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = "$sensorLux lux",
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(lux) {
-                        top.linkTo(dn.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = accelerometerData,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.constrainAs(accel) {
-                        top.linkTo(lux.bottom, 1.dp)
-                        end.linkTo(parent.end, 5.dp)
-                    })
-
-                Text(
-                    text = "Last update: $lastCheck",
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier
-                        .constrainAs(lc) {
-                            top.linkTo(accel.bottom, 1.dp)
-                            start.linkTo(parent.end, 5.dp)
-                        })
-
-                Image(painterResource(id = R.drawable.ic_plant2),
-                    contentDescription = "the_plant",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(plant) {
-                            bottom.linkTo(pot.top, (-2).dp)
-                        })
-
-                Image(painterResource(id = R.drawable.ic_pot12),
-                    contentDescription = "the_pot",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(pot) {
-                            bottom.linkTo(ground.top, (-48).dp)
-                        })
-                BottomIndicator(
-                    model = model,
-                    modifier = Modifier.constrainAs(bottomBar) {
-                        bottom.linkTo(parent.bottom, 5.dp)
-                    })
-
+                    Particles(iteration = 10, parameters = snowParameters)
+                }
             }
         }
     }
@@ -144,7 +158,11 @@ fun GameUI(model: PlantagotchiModel) {
 @Composable
 fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
     with(model) {
-        Column(modifier = modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp)) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp)
+        ) {
 
             Text(
                 text = "What does your plant need?",
