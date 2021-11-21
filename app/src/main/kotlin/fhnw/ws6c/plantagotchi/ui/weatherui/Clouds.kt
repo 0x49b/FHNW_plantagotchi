@@ -35,13 +35,12 @@ fun Clouds(
             minAngle = 0,
             maxAngle = 0,
             shape = PrecipitationShape.Image(
-                image = ImageBitmap.imageResource(R.drawable.cloud),
-                minWidth = with(LocalDensity.current) { 60.dp.toPx() }.toInt(),
-                maxWidth = with(LocalDensity.current) { 120.dp.toPx() }.toInt(),
-                minHeight = with(LocalDensity.current) { 30.dp.toPx() }.toInt(),
-                maxHeight = with(LocalDensity.current) { 60.dp.toPx() }.toInt(),
+                image = ImageBitmap.imageResource(R.drawable.cloud1),
+                minWidth = with(LocalDensity.current) {69.dp.toPx()}.toInt(),
+                maxWidth = with(LocalDensity.current) { 138.dp.toPx() }.toInt(),
+                minHeight = with(LocalDensity.current) { 31.dp.toPx() }.toInt(),
+                maxHeight = with(LocalDensity.current) { 62.dp.toPx() }.toInt(),
                 colorFilter = tint
-
             ),
             sourceEdge = PrecipitationSourceEdge.RIGHT
         )
@@ -63,7 +62,7 @@ fun CloudsPreview() {
             Color.Black.copy(alpha = 0.2f),
             BlendMode.SrcAtop
         ),
-        particleAnimationIteration = 1,
+        particleAnimationIteration = 10,
         cloudCount = 8
     )
 }

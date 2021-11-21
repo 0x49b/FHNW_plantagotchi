@@ -34,9 +34,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URL
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -51,9 +54,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      */
 
     var oldSelectedWeatherTime: Date = Date()
-    private val _particleAnimationIteration = MutableStateFlow(0L)
+    private val _particleAnimationIteration = MutableStateFlow(1L)
     val particleAnimationIteration: StateFlow<Long> = _particleAnimationIteration
-
 
 
     /**
@@ -199,6 +201,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 positionData = "${it.latitude},${it.longitude}"
                 position = it
                 gameState.playerState.lastPosition = it
+                loadWeatherData(position.latitude, position.longitude)
             },
             onFailure = { positionData = "Cannot get current position" },
             onPermissionDenied = {
@@ -209,7 +212,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 ActivityCompat.requestPermissions(activity, permissions, 10)
             }
         )
-        loadWeatherData(position.latitude, position.longitude)
+
     }
 
     /**
@@ -233,7 +236,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private fun loadWeatherData(latitude: Double, longitude: Double) {
 
         val urlString =
-            "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=${getAPIKey()}"
+            "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=${getAPIKey()}&units=metric"
+
+        Log.d(TAG, urlString)
 
         modelScope.launch {
 
@@ -241,12 +246,24 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             val weatherJSON = apiConnector.getJSONString(url)
             val weatherJSONObject = JSONObject(weatherJSON)
             val currentWeather = weatherJSONObject.getJSONObject("current")
+            val currentWeatherWeather = JSONObject(currentWeather.getJSONArray("weather")[0].toString())
             //val minutelyWeather = weatherJSONObject.getJSONArray("minutely")[0]
             val dailyWeather = weatherJSONObject.getJSONArray("daily")[0]
             //val dailyWeatherTemp = dailyWeather.getJSONObject("temp")
             Log.d(TAG, weatherJSON)
 
+            Log.d(TAG, "${currentWeatherWeather.getLong("id").toInt()}" )
+
+
+
             Log.d(TAG, "current temp from new loader ${currentWeather.getLong("temp")}")
+
+            val calendar = Calendar.getInstance()
+            calendar[Calendar.MINUTE] = 0
+            calendar[Calendar.SECOND] = 0
+            calendar[Calendar.MILLISECOND] = 0
+
+            Log.d(TAG, "calendar time ${calendar.time}")
 
             val weatherFacts = WeatherFacts(
                 temperature = currentWeather.getLong("temp").toFloat(),
@@ -259,32 +276,58 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 visibility = currentWeather.getLong("visibility").toFloat(),
                 uvIndex = currentWeather.getLong("uvi").toInt(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
-                state = WeatherState.CLEAR_SKY
+                state = getWeatherState( 200 )
             )
             cWeather = CurrentWeather(
-                time = Calendar.getInstance().time,
+                time = calendar.time,
                 hourWeather = weatherFacts,
-                sunrise = currentWeather.getString("sunrise"),
-                sunset = currentWeather.getString("sunset"),
+                sunrise = formatUnix(currentWeather.getString("sunrise")),
+                sunset = formatUnix(currentWeather.getString("sunset")),
                 minTemperature = 0,//dailyWeatherTemp.getInt("min"),
                 maxTemperature = 0,//dailyWeatherTemp.getInt("max")
             )
 
-            calculateDayOrNight(cWeather.sunrise.toLong(), cWeather.sunset.toLong())
+            calculateDayOrNight(
+                currentWeather.getString("sunrise"),
+                currentWeather.getString("sunset")
+            )
 
         }
+    }
+
+    private fun getWeatherState(weatherId: Int): WeatherState {
+
+        return when (weatherId) {
+            200, 201, 202, 210, 211, 212, 221, 230, 231, 232, 781 -> WeatherState.THUNDERSTORM
+            300, 301, 302, 310, 311, 312, 313, 314, 321, 500, 501, 502, 503, 504, 511, 520, 521, 522, 531 -> WeatherState.RAIN
+            600, 601, 602, 611, 612, 613, 615, 616, 620, 621, 622 -> WeatherState.SNOW
+            701, 711, 721, 731, 741, 751, 761, 762, 771 -> WeatherState.FOG
+            801 -> WeatherState.FEW_CLOUDS
+            802, 803 -> WeatherState.SCATTERED_CLOUDS
+            804 -> WeatherState.MOSTLY_CLOUDY
+            else -> WeatherState.CLEAR_SKY
+        }
+
+
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun formatUnix(unix: String): String {
+        val sdf = SimpleDateFormat("HH:mm")
+        val t = Date(unix.toLong() * 1000)
+        return sdf.format(t).toString()
     }
 
     /**
      * Check if it is Night or Day
      */
-    private fun calculateDayOrNight(sunriseTimestamp: Long, sunsetTimestamp: Long) {
+    private fun calculateDayOrNight(sunriseTimestamp: String, sunsetTimestamp: String) {
         val sunrise = Instant
-            .ofEpochSecond(sunriseTimestamp)
+            .ofEpochSecond(sunriseTimestamp.toLong())
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
         val sunset = Instant
-            .ofEpochSecond(sunsetTimestamp)
+            .ofEpochSecond(sunsetTimestamp.toLong())
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
         val currentDateTime = ZonedDateTime.now().toLocalDateTime()

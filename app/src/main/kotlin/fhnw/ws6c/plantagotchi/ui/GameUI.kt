@@ -1,26 +1,17 @@
 package fhnw.ws6c.plantagotchi.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
-import dev.chrisbanes.accompanist.insets.ProvideWindowInsets
-import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
-import fhnw.ws6c.plantagotchi.ui.particlesystem.Particles
-import fhnw.ws6c.plantagotchi.ui.particlesystem.snowParameters
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
 
@@ -29,14 +20,14 @@ import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
 @Composable
 fun GameUI(model: PlantagotchiModel) {
     with(model) {
-        ProvideWindowInsets {
+        //ProvideWindowInsets {
             PlantagotchiTheme(darkTheme = dark) {
 
                 Box(modifier = Modifier.fillMaxSize()) {
 
                     DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
 
-                    ConstraintLayout(
+                    /*ConstraintLayout(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(color = MaterialTheme.colors.background)
@@ -146,12 +137,10 @@ fun GameUI(model: PlantagotchiModel) {
                                 bottom.linkTo(parent.bottom, 5.dp)
                             })
 
-                    }
-
-                    Particles(iteration = 10, parameters = snowParameters)
+                    }*/
                 }
             }
-        }
+        //}
     }
 }
 

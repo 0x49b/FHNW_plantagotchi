@@ -10,7 +10,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
@@ -25,7 +27,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import dev.chrisbanes.accompanist.insets.statusBarsPadding
 import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.data.weather.CurrentWeather
 import fhnw.ws6c.plantagotchi.data.weather.WeatherState
@@ -42,53 +43,48 @@ fun DynamicWeatherSection(
     currentWeather: CurrentWeather,
     viewModel: PlantagotchiModel
 ) {
-    
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.4f)
-        ) {
 
-            //val configuration = LocalConfiguration.current
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(fraction = 0.75f)
+    ) {
 
-            DynamicWeatherLandscape(
-                currentWeather,
-                constraints,
-                //with(LocalDensity.current) { configuration.screenHeightDp.dp.toPx().toInt() },
-                //with(LocalDensity.current) { configuration.screenWidthDp.dp.toPx().toInt() },
-                viewModel
-            )
-        }
-    
+        DynamicWeatherLandscape(
+            currentWeather,
+            constraints,
+            viewModel
+        )
+    }
+
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DynamicWeatherLandscape(
     weather: CurrentWeather,
     constraints: Constraints,
-    //maxHeight: Int,
-    //maxWidth: Int,
     viewModel: PlantagotchiModel
 ) {
+
     var nightTintAlpha by rememberSaveable { mutableStateOf(0f) }
     var backgroundLayer2Alpha by rememberSaveable { mutableStateOf(0f) }
-    val height = constraints.maxHeight // maxHeight
-    val width = constraints.maxWidth // maxWidth
+    val height = constraints.maxHeight
+    val width = constraints.maxWidth
 
     val calendar = Calendar.getInstance()
     calendar.time = viewModel.oldSelectedWeatherTime
 
-    val oldTimeInMin = calendar[Calendar.HOUR_OF_DAY] * MINUTES_PER_HOUR +
-            calendar[Calendar.MINUTE]
+    val oldTimeInMin = calendar[Calendar.HOUR_OF_DAY] * MINUTES_PER_HOUR + calendar[Calendar.MINUTE]
     calendar.time = weather.time
-    val newTimeInMin = calendar[Calendar.HOUR_OF_DAY] * MINUTES_PER_HOUR +
-            calendar[Calendar.MINUTE]
+    val newTimeInMin = calendar[Calendar.HOUR_OF_DAY] * MINUTES_PER_HOUR + calendar[Calendar.MINUTE]
 
     val currentState = remember {
         MutableTransitionState(AnimatedTimeJumpProgress.START)
             .apply { targetState = AnimatedTimeJumpProgress.END }
     }
-    val transition = updateTransition(currentState)
+
+    val transition = updateTransition(currentState, label = "transition")
 
     val timeInMin by transition.animateFloat(
         transitionSpec = {
@@ -96,7 +92,8 @@ fun DynamicWeatherLandscape(
                 durationMillis = 900,
                 easing = LinearOutSlowInEasing
             )
-        }
+        },
+        label = ""
     ) { progress ->
         if (progress == AnimatedTimeJumpProgress.START) {
             oldTimeInMin.toFloat()
@@ -112,16 +109,14 @@ fun DynamicWeatherLandscape(
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
+
         val (
-            backgroundLayer1, backgroundLayer2, mountain, particles, clouds, fog, temperature,
-            temperatureUnit, weatherDescription
+            backgroundLayer1, backgroundLayer2, mountain, particles, clouds, fog
         ) = createRefs()
 
-        val (sunriseHour, sunriseMinute) = weather.sunrise.split(":")
-            .map { it.toFloat() }
+        val (sunriseHour, sunriseMinute) = weather.sunrise.split(":").map { it.toFloat() }
         val sunriseAt = sunriseHour * 60 + sunriseMinute
-        val (sunsetHour, sunsetMinute) = weather.sunset.split(":")
-            .map { it.toFloat() }
+        val (sunsetHour, sunsetMinute) = weather.sunset.split(":").map { it.toFloat() }
         val sunsetAt = sunsetHour * 60 + sunsetMinute
 
         val sunProgress = (timeInMin - (sunriseAt - LANDSCAPE_TRANSITION_DURATION)) /
@@ -132,8 +127,7 @@ fun DynamicWeatherLandscape(
             timeInMin > sunsetAt -> timeInMin - sunsetAt
             else -> 0f
         }
-        val moonProgress = nightElapsedTimeInMin /
-                (MINUTES_PER_DAY - sunsetAt + sunriseAt)
+        val moonProgress = nightElapsedTimeInMin / (MINUTES_PER_DAY - sunsetAt + sunriseAt)
 
         val (backgroundLayer1Image, backgroundLayer2Image) = when {
             timeInMin < sunriseAt - LANDSCAPE_TRANSITION_DURATION -> R.drawable.night to null
@@ -173,6 +167,7 @@ fun DynamicWeatherLandscape(
             timeInMin > sunsetAt + MOUNTAIN_TINT_TRANSITION_DURATION -> 1f
             else -> 0f
         }
+
         nightTintAlpha = mountainDarkTintPercent * MOUNTAIN_TINT_ALPHA_MAX
 
         backgroundLayer2Alpha = 1 - progress
@@ -233,6 +228,7 @@ fun DynamicWeatherLandscape(
                 )
                 .size(64.dp),
         )
+
         Image(
             painter = painterResource(R.drawable.moon),
             contentDescription = stringResource(R.string.moon),
@@ -244,7 +240,6 @@ fun DynamicWeatherLandscape(
                 )
                 .size(64.dp),
         )
-
         val weatherState = weather.hourWeather.state
         Crossfade(targetState = weatherState) { state ->
             val fogAlpha = when (state) {
@@ -277,13 +272,13 @@ fun DynamicWeatherLandscape(
         if (weatherState == WeatherState.THUNDERSTORM) {
             Thunder(
                 particleAnimationIteration,
-                height, //constraints.maxWidth,
-                width// constraints.maxHeigh
+                height,
+                width
             )
         }
 
         Image(
-            painter = painterResource(R.drawable.landscape),
+            painter = painterResource(R.drawable.pixel_landscape),
             contentDescription = stringResource(R.string.moutain),
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
@@ -327,7 +322,6 @@ fun DynamicWeatherLandscape(
             if (cloudCount > 0) {
                 Clouds(
                     modifier = Modifier
-                        .statusBarsPadding()
                         .fillMaxWidth()
                         .fillMaxHeight(0.5f)
                         .constrainAs(clouds) {
@@ -360,57 +354,8 @@ fun DynamicWeatherLandscape(
             }
         }
 
-        val textShadow = Shadow(
-            offset = Offset(5f, 5f),
-            blurRadius = 5f
-        )
 
-        val textColor = white.copy(alpha = 0.8f)
-        Text(
-            text = weather.hourWeather.temperature.toInt().toString(),
-            style = MaterialTheme.typography.h1.copy(
-                fontSize = 60.sp,
-                shadow = textShadow
-            ),
-            color = textColor,
-            modifier = Modifier
-                .statusBarsPadding()
-                .constrainAs(temperature) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start, margin = 16.dp)
-                }
-        )
 
-        Text(
-            text = "°C",
-            style = MaterialTheme.typography.h1.copy(
-                shadow = textShadow
-            ),
-            color = textColor,
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(top = 12.dp)
-                .constrainAs(temperatureUnit) {
-                    top.linkTo(parent.top)
-                    start.linkTo(temperature.end, margin = 4.dp)
-                }
-        )
-
-        //val description = stringResource(id = weatherState.getDescriptionRes())
-        val description = "b"
-        Text(
-            text = "Lyon  •  $description",
-            style = MaterialTheme.typography.h2.copy(
-                fontWeight = FontWeight.Normal,
-                shadow = textShadow
-            ),
-            color = textColor,
-            modifier = Modifier
-                .constrainAs(weatherDescription) {
-                    top.linkTo(temperature.bottom, margin = 8.dp)
-                    start.linkTo(parent.start, margin = 16.dp)
-                }
-        )
     }
 }
 
