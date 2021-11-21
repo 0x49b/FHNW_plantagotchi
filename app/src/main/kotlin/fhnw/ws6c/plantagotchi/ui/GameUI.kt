@@ -55,29 +55,49 @@ fun GameUI(model: PlantagotchiModel) {
                         }
                 )
 
-                    Image(
-                        painter = painterResource(id = R.drawable.chest),
-                        contentDescription = "chest",
-                        modifier = Modifier
-                            .padding(top=35.dp, end=8.dp)
-                            .size(40.dp)
-
-                            .constrainAs(chest) {
-                                end.linkTo(parent.end, 5.dp)
-                                top.linkTo(parent.top, 5.dp)
-                            }
-                    )
-
                 Image(
-                    painter = painterResource(id = R.drawable.coint_counter),
-                    contentDescription = "coin_counter",
+                    painter = painterResource(id = R.drawable.chest),
+                    contentDescription = "chest",
                     modifier = Modifier
-                        .padding(start=12.dp)
-                        .size(120.dp)
+                        .padding(top = 35.dp, end = 8.dp)
+                        .size(40.dp)
+
+                        .constrainAs(chest) {
+                            end.linkTo(parent.end, 5.dp)
+                            top.linkTo(parent.top, 5.dp)
+                        }
+                )
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+
                         .constrainAs(coin_counter) {
                             top.linkTo(parent.top, 0.dp)
                         }
-                )
+                ) {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.coint_counter),
+                        contentDescription = "coin_counter",
+                        modifier = Modifier
+                            .padding(start = 20.dp)
+                            .size(120.dp)
+
+                    )
+
+                    Text(
+                        text = "9999",
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(start = 25.dp)
+
+
+                    )
+
+                }
+
 
                 Image(painterResource(id = R.drawable.ic_plant2),
                     contentDescription = "the_plant",
@@ -108,7 +128,11 @@ fun GameUI(model: PlantagotchiModel) {
 @Composable
 fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
     with(model) {
-        Column(modifier = modifier.fillMaxWidth().padding(top = 10.dp, bottom = 10.dp)) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp)
+        ) {
 
             Text(
                 text = "What does your plant need?",
@@ -131,17 +155,19 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(start=30.dp)
+                .padding(start = 30.dp)
 
         ) {
 
-                Image(painterResource(id = R.drawable.button_love),
-                    contentDescription = "button_love",
-                    modifier = Modifier
-                        .size(65.dp)
-                )
+            Image(
+                painterResource(id = R.drawable.button_love),
+                contentDescription = "button_love",
+                modifier = Modifier
+                    .size(65.dp)
+            )
 
-            Image(painterResource(id = R.drawable.heart),
+            Image(
+                painterResource(id = R.drawable.heart),
                 contentDescription = "heart",
                 modifier = Modifier
                     .size(25.dp)
@@ -149,39 +175,43 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
 
         }
 
-    Box(
-        contentAlignment = Alignment.Center,
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(start=20.dp)
-    ) {
+                .padding(start = 20.dp)
+        ) {
 
-        Image(painterResource(id = R.drawable.button_fertilizer),
-            contentDescription = "button_fertilizer",
-            modifier = Modifier
-                .size(65.dp)
-        )
+            Image(
+                painterResource(id = R.drawable.button_fertilizer),
+                contentDescription = "button_fertilizer",
+                modifier = Modifier
+                    .size(65.dp)
+            )
 
-        Image(painterResource(id = R.drawable.fertilizer),
-            contentDescription = "fertilizer",
-            modifier = Modifier
-                .size(25.dp)
-        )
+            Image(
+                painterResource(id = R.drawable.fertilizer),
+                contentDescription = "fertilizer",
+                modifier = Modifier
+                    .size(25.dp)
+            )
 
-    }
+        }
 
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(start=20.dp)
+                .padding(start = 20.dp)
         ) {
 
-            Image(painterResource(id = R.drawable.button_water),
+            Image(
+                painterResource(id = R.drawable.button_water),
                 contentDescription = "button_water",
                 modifier = Modifier
                     .size(65.dp)
             )
 
-            Image(painterResource(id = R.drawable.water),
+            Image(
+                painterResource(id = R.drawable.water),
                 contentDescription = "water",
                 modifier = Modifier
                     .size(25.dp)
@@ -191,22 +221,24 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
 
         Box(
             contentAlignment = Alignment.Center,
-           modifier = Modifier
-               .padding(start=20.dp)
+            modifier = Modifier
+                .padding(start = 20.dp)
         ) {
 
-            Image(painterResource(id = R.drawable.button_sunshine),
+            Image(
+                painterResource(id = R.drawable.button_sunshine),
                 contentDescription = "button_sunshine",
                 modifier = Modifier
                     .size(65.dp)
             )
 
-            Image(painterResource(id = R.drawable.sunshine),
+            Image(
+                painterResource(id = R.drawable.sunshine),
                 contentDescription = "sunshine",
                 modifier = Modifier
                     .size(25.dp)
             )
 
         }
-}
+    }
 }
