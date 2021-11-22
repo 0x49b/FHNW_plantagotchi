@@ -32,6 +32,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -131,6 +132,12 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
         // Todo Change this
         dataLoop()
+        modelScope.launch(Dispatchers.Default) {
+            while (true) {
+                _particleAnimationIteration.value++
+                delay(1L)
+            }
+        }
     }
 
 

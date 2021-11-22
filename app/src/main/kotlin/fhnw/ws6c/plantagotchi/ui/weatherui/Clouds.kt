@@ -44,7 +44,6 @@ fun Clouds(
             ),
             sourceEdge = PrecipitationSourceEdge.RIGHT
         )
-
         Particles(
             modifier = Modifier
                 .fillMaxSize(),
@@ -62,7 +61,7 @@ fun CloudsPreview() {
             Color.Black.copy(alpha = 0.2f),
             BlendMode.SrcAtop
         ),
-        particleAnimationIteration = 10,
+        particleAnimationIteration = 1,
         cloudCount = 8
     )
 }

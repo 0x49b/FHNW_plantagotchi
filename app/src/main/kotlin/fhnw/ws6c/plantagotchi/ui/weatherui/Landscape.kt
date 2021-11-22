@@ -47,7 +47,7 @@ fun DynamicWeatherSection(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(fraction = 0.75f)
+            .fillMaxHeight()
     ) {
 
         DynamicWeatherLandscape(
