@@ -44,3 +44,20 @@ val rainParameters = PrecipitationsParameters(
     ),
     sourceEdge = PrecipitationSourceEdge.TOP
 )
+
+val lightRainParameters = PrecipitationsParameters(
+    particleCount = 150,
+    distancePerStep = 30,
+    minSpeed = 0.7f,
+    maxSpeed = 1f,
+    minAngle = 265,
+    maxAngle = 285,
+    shape = PrecipitationShape.Line(
+        minStrokeWidth = 1,
+        maxStrokeWidth = 3,
+        minHeight = 10,
+        maxHeight = 15,
+        color = Color.Gray,
+    ),
+    sourceEdge = PrecipitationSourceEdge.TOP
+)

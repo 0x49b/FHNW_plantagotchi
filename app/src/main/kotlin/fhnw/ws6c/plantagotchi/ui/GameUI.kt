@@ -2,6 +2,7 @@ package fhnw.ws6c.plantagotchi.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -20,6 +21,7 @@ import coil.Coil
 import coil.annotation.ExperimentalCoilApi
 import com.skydoves.landscapist.glide.GlideImage
 import fhnw.ws6c.R
+import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
@@ -65,6 +67,7 @@ fun GameUI(model: PlantagotchiModel) {
                                     end.linkTo(parent.end, 5.dp)
                                     top.linkTo(parent.top, 5.dp)
                                 }
+                                .clickable { model.setWeatherState(WeatherState.RAIN) }
                         )
 
                         Box(
@@ -82,6 +85,7 @@ fun GameUI(model: PlantagotchiModel) {
                                 modifier = Modifier
                                     .padding(start = 20.dp)
                                     .size(120.dp)
+                                    .clickable { model.setWeatherState(WeatherState.THUNDERSTORM) }
                             )
 
                             Text(
@@ -212,6 +216,7 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
                 contentDescription = "water",
                 modifier = Modifier
                     .size(25.dp)
+                    .clickable { model.setActualWeather() }
             )
 
         }
@@ -234,6 +239,7 @@ fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
                 contentDescription = "sunshine",
                 modifier = Modifier
                     .size(25.dp)
+                    .clickable { model.setWeatherState(WeatherState.CLEAR_SKY) }
             )
 
         }

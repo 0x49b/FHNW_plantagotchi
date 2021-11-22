@@ -22,6 +22,7 @@ import fhnw.ws6c.plantagotchi.data.GeoPosition
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
 import fhnw.ws6c.plantagotchi.data.connectors.FirebaseConnector
 import fhnw.ws6c.plantagotchi.data.connectors.GPSConnector
+import fhnw.ws6c.plantagotchi.data.connectors.MockGPSConnector
 import fhnw.ws6c.plantagotchi.data.state.GameState
 import fhnw.ws6c.plantagotchi.data.weather.CurrentWeather
 import fhnw.ws6c.plantagotchi.data.weather.WeatherFacts
@@ -77,7 +78,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     /**
      * Init of Connectors
      */
-    var gpsConnector = GPSConnector(activity)
+    //var gpsConnector = GPSConnector(activity)
+    var gpsConnector = MockGPSConnector(activity)
     var apiConnector = ApiConnector()
     var firebaseConnector = FirebaseConnector(AppPreferences)
     var statsTitle = "PlantaGotchi Stats"
@@ -283,7 +285,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 visibility = currentWeather.getLong("visibility").toFloat(),
                 uvIndex = currentWeather.getLong("uvi").toInt(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
-                state = getWeatherState( 200 )
+                state = getWeatherState( currentWeatherWeather.getLong("id").toInt() )
+                //state = getWeatherState( 502 )
             )
             cWeather = CurrentWeather(
                 time = calendar.time,
@@ -302,11 +305,21 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
+    fun setWeatherState(state: WeatherState){
+        cWeather.hourWeather.state = state
+    }
+
+    fun setActualWeather(){
+        dataLoop()
+    }
+
     private fun getWeatherState(weatherId: Int): WeatherState {
 
         return when (weatherId) {
             200, 201, 202, 210, 211, 212, 221, 230, 231, 232, 781 -> WeatherState.THUNDERSTORM
-            300, 301, 302, 310, 311, 312, 313, 314, 321, 500, 501, 502, 503, 504, 511, 520, 521, 522, 531 -> WeatherState.RAIN
+            300, 301, 302, 310, 311, 312, 313, 314, 321, 500 -> WeatherState.LIGHT_RAIN
+            501,  511, 520, 521, 522, 531 -> WeatherState.RAIN
+            502, 503, 504 -> WeatherState.HEAVY_RAIN
             600, 601, 602, 611, 612, 613, 615, 616, 620, 621, 622 -> WeatherState.SNOW
             701, 711, 721, 731, 741, 751, 761, 762, 771 -> WeatherState.FOG
             801 -> WeatherState.FEW_CLOUDS

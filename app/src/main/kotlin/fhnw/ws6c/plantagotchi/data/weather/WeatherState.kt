@@ -6,6 +6,7 @@ enum class WeatherState {
     SCATTERED_CLOUDS,
     MOSTLY_CLOUDY,
     HEAVY_RAIN,
+    LIGHT_RAIN,
     THUNDERSTORM,
     RAIN,
     SNOW,

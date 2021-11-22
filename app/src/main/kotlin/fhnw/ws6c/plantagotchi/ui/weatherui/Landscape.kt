@@ -32,6 +32,7 @@ import fhnw.ws6c.plantagotchi.data.weather.CurrentWeather
 import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.particlesystem.Particles
+import fhnw.ws6c.plantagotchi.ui.particlesystem.lightRainParameters
 import fhnw.ws6c.plantagotchi.ui.particlesystem.rainParameters
 import fhnw.ws6c.plantagotchi.ui.particlesystem.snowParameters
 import fhnw.ws6c.plantagotchi.ui.theme.white
@@ -296,6 +297,7 @@ fun DynamicWeatherLandscape(
 
         Crossfade(targetState = weatherState) { state ->
             val precipitationsParameters = when (state) {
+                WeatherState.LIGHT_RAIN -> rainParameters.copy(particleCount = 150)
                 WeatherState.RAIN -> rainParameters
                 WeatherState.HEAVY_RAIN -> rainParameters.copy(particleCount = 2000)
                 WeatherState.THUNDERSTORM -> rainParameters.copy(
@@ -309,6 +311,7 @@ fun DynamicWeatherLandscape(
 
             val cloudCount = when (state) {
                 WeatherState.RAIN -> 3
+                WeatherState.LIGHT_RAIN -> 3
                 WeatherState.HEAVY_RAIN -> 5
                 WeatherState.THUNDERSTORM -> 6
                 WeatherState.SNOW -> 3
@@ -317,6 +320,7 @@ fun DynamicWeatherLandscape(
                 WeatherState.SCATTERED_CLOUDS -> 3
                 WeatherState.MOSTLY_CLOUDY -> 8
                 WeatherState.FOG -> 3
+                else -> 0
             }
 
             if (cloudCount > 0) {
@@ -353,7 +357,6 @@ fun DynamicWeatherLandscape(
                 )
             }
         }
-
 
 
     }
