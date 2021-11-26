@@ -78,8 +78,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     /**
      * Init of Connectors
      */
-    //var gpsConnector = GPSConnector(activity)
-    var gpsConnector = MockGPSConnector(activity)
+    var gpsConnector = GPSConnector(activity)
+    //var gpsConnector = MockGPSConnector(activity)
     var apiConnector = ApiConnector()
     var firebaseConnector = FirebaseConnector(AppPreferences)
     var statsTitle = "PlantaGotchi Stats"
@@ -133,7 +133,16 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
 
         // Todo Change this
-        dataLoop()
+        fixedRateTimer(
+            name = "plantagotchi-game-loop",
+            initialDelay = 0,
+            period = 10000,
+            daemon = true
+        ) {
+            dataLoop()
+            Log.d(TAG, "Data Loop runned $position")
+        }
+
         modelScope.launch(Dispatchers.Default) {
             while (true) {
                 _particleAnimationIteration.value++
@@ -256,23 +265,11 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             val weatherJSONObject = JSONObject(weatherJSON)
             val currentWeather = weatherJSONObject.getJSONObject("current")
             val currentWeatherWeather = JSONObject(currentWeather.getJSONArray("weather")[0].toString())
-            //val minutelyWeather = weatherJSONObject.getJSONArray("minutely")[0]
-            val dailyWeather = weatherJSONObject.getJSONArray("daily")[0]
-            //val dailyWeatherTemp = dailyWeather.getJSONObject("temp")
-            Log.d(TAG, weatherJSON)
-
-            Log.d(TAG, "${currentWeatherWeather.getLong("id").toInt()}" )
-
-
-
-            Log.d(TAG, "current temp from new loader ${currentWeather.getLong("temp")}")
 
             val calendar = Calendar.getInstance()
             calendar[Calendar.MINUTE] = 0
             calendar[Calendar.SECOND] = 0
             calendar[Calendar.MILLISECOND] = 0
-
-            Log.d(TAG, "calendar time ${calendar.time}")
 
             val weatherFacts = WeatherFacts(
                 temperature = currentWeather.getLong("temp").toFloat(),
@@ -285,8 +282,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 visibility = currentWeather.getLong("visibility").toFloat(),
                 uvIndex = currentWeather.getLong("uvi").toInt(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
-                state = getWeatherState( currentWeatherWeather.getLong("id").toInt() )
-                //state = getWeatherState( 502 )
+                state = getWeatherState( currentWeatherWeather.getLong("id").toInt() ),
+
+
             )
             cWeather = CurrentWeather(
                 time = calendar.time,

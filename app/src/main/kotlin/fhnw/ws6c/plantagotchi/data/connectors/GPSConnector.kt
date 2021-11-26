@@ -40,6 +40,7 @@ class GPSConnector(val activity: Activity) {
             locationProvider.lastLocation
                 .addOnSuccessListener(activity) {
                     // der Emulator liefert null zurueck. In diesem Fall nehmen wir einfach 'brugg'
+
                     onSuccess.invoke(
                         if (it == null) brugg else GeoPosition(
                             it.longitude,

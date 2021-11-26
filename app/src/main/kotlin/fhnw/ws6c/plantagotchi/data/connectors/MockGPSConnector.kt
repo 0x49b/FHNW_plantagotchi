@@ -14,7 +14,8 @@ import fhnw.ws6c.plantagotchi.data.GeoPosition
  */
 class MockGPSConnector(val activity: Activity) {
 
-    private val brugg = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 1635.0)
+    //private val brugg = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 1635.0)
+    private val brugg = GeoPosition(latitude = 66.7715888, longitude =-158.48259, altitude = 1635.0)
     private val PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION

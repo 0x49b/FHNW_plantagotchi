@@ -170,7 +170,6 @@ fun DynamicWeatherLandscape(
         }
 
         nightTintAlpha = mountainDarkTintPercent * MOUNTAIN_TINT_ALPHA_MAX
-
         backgroundLayer2Alpha = 1 - progress
 
         if (backgroundLayer1Image != null) {
@@ -320,7 +319,6 @@ fun DynamicWeatherLandscape(
                 WeatherState.SCATTERED_CLOUDS -> 3
                 WeatherState.MOSTLY_CLOUDY -> 8
                 WeatherState.FOG -> 3
-                else -> 0
             }
 
             if (cloudCount > 0) {
