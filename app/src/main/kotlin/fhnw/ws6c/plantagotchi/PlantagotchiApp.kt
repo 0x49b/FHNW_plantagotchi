@@ -17,7 +17,7 @@ object PlantagotchiApp : EmobaApp {
     override fun initialize(activity: ComponentActivity) {
         AppPreferences.init(activity)
         model = PlantagotchiModel(activity)
-        //model.appStartup()
+        model.appStartup()
     }
 
     @Composable

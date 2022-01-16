@@ -2,6 +2,7 @@ package fhnw.ws6c.plantagotchi.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -9,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,12 @@ fun GameUI(model: PlantagotchiModel) {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = MaterialTheme.colors.background)
+                    .pointerInput(Unit){
+                        detectDragGestures { change, dragAmount ->
+                            change.consumeAllChanges()
+                            addLove(dragAmount)
+                        }
+                    }
             ) {
 
                 val (background, ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()

@@ -80,6 +80,7 @@ dependencies {
 
     // making Firestore working in Emulator
     implementation "io.grpc:grpc-okhttp:1.32.2"
+    implementation 'com.google.firebase:firebase-firestore:21.4.0'
 
     // Required for instrumented tests
     testImplementation 'junit:junit:4.13.2'
