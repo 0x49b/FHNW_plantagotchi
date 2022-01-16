@@ -261,7 +261,7 @@ fun StateBubble(model: PlantagotchiModel, value: Float, color: Color, img: Int) 
                     radius = size.minDimension / 4
                 )
                 drawRect(
-                    color = Color.Red,
+                    color = Color.Black,
                     size = Size(width = 100.dp.toPx(), height = value),
                     blendMode = BlendMode.DstOut
                 )

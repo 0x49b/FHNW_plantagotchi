@@ -277,16 +277,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
                 ActivityCompat.requestPermissions(activity, permissions, 10)
-                position = GeoPosition(
-                    latitude = 47.48124530209937,
-                    longitude = 8.211087703634524,
-                    altitude = 522.0
-                )
             }
         )
 
         //Todo check on real device
+        // FHNW
         position = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 522.0)
+
+        // GoldenGate Bridge
+        //position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
 
         loadWeatherData(position.latitude, position.longitude)
 
