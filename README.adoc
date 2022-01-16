@@ -5,7 +5,6 @@
 * Joyce Hänggi (joycehaenggi)
 * Florian Thiévent (lichtwellenreiter)
 
-
 === Attribution
 * Weather Particles based on https://github.com/fidloo/flux
 

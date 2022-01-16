@@ -11,7 +11,7 @@ data class WeatherFacts(
     val visibility: Float,
     val uvIndex: Int,
     val dewPoint: Int,
-    val state: WeatherState,
+    var state: WeatherState,
 ) {
     companion object {
         val Default = WeatherFacts(

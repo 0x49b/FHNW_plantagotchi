@@ -7,11 +7,11 @@ class GameState() {
 
     fun toHashMap(): HashMap<String, HashMap<String, Any>> {
         return hashMapOf(
-            "playerState" to playerState.toHashMap()
+                "playerState" to playerState.toHashMap()
         )
     }
 
     fun toJSON(): String {
-        return "\"playerId\": ${playerId}, \"playerState\":${playerState.toJSON()}"
+        return "\"playerId\": ${playerId},\"playerState\":${playerState.toJSON()}"
     }
 }

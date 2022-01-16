@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 import fhnw.ws6c.plantagotchi.data.GeoPosition
@@ -15,8 +14,7 @@ import fhnw.ws6c.plantagotchi.data.GeoPosition
  */
 class GPSConnector(val activity: Activity) {
 
-    private val TAG = "PlantaGotchiGPSConnector"
-    private val brugg = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 1635.0)
+    private val brugg = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 522.0)
     private val PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -28,7 +26,7 @@ class GPSConnector(val activity: Activity) {
         requestPermissions()
     }
 
-    fun requestPermissions() {
+    private fun requestPermissions() {
         ActivityCompat.requestPermissions(activity, PERMISSIONS, 10)
     }
 
@@ -41,16 +39,15 @@ class GPSConnector(val activity: Activity) {
         if (PERMISSIONS.oneOfGranted()) {
             locationProvider.lastLocation
                 .addOnSuccessListener(activity) {
-
-                    Log.d(TAG, it.toString())
-
                     // der Emulator liefert null zurueck. In diesem Fall nehmen wir einfach 'brugg'
+
                     onSuccess.invoke(
-                        if (it == null) brugg else GeoPosition(
+                        /*if (it == null) brugg else GeoPosition(
                             it.longitude,
                             it.latitude,
                             it.altitude
-                        )
+                        )*/
+                        brugg
                     )
                 }
                 .addOnFailureListener(activity) {

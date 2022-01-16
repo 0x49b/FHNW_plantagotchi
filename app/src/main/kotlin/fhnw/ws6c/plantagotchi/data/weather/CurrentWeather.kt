@@ -1,7 +1,6 @@
 package fhnw.ws6c.plantagotchi.data.weather
 
-import java.util.Calendar
-import java.util.Date
+import java.util.*
 
 data class CurrentWeather(
     val time: Date,
