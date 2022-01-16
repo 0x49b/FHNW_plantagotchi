@@ -46,7 +46,7 @@ import kotlin.concurrent.fixedRateTimer
 
 @SuppressLint("UseCompatLoadingForDrawables")
 class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
-        SensorEventListener {
+    SensorEventListener {
 
 
     /**
@@ -68,7 +68,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      * Sensor Stuff
      */
     private var sensorManager: SensorManager =
-            activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var brightness: Sensor? = null
     private var accelerometer: Sensor? = null
 
@@ -108,18 +108,24 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      * OpenWeather API Keys
      */
     val openWeatherAPIKEY = arrayOf(
-            "18b075743cb869bcc0fe9f4977f3696e",
-            "89256d338d3202fa44b7deac9b0c208a",
-            "1abd7b50c169e42776138698accfefc8",
-            "a04c01f715bebacc9295dcf9f22acf12",
-            "3867fa45c8569be5ce88e0337c5beba5",
-            "7b01cceea663181163db89f3af7e84eb"
+        "18b075743cb869bcc0fe9f4977f3696e",
+        "89256d338d3202fa44b7deac9b0c208a",
+        "1abd7b50c169e42776138698accfefc8",
+        "a04c01f715bebacc9295dcf9f22acf12",
+        "3867fa45c8569be5ce88e0337c5beba5",
+        "7b01cceea663181163db89f3af7e84eb"
     )
 
     /**
      * Position Objects
      */
-    var position by mutableStateOf(GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 522.0))
+    var position by mutableStateOf(
+        GeoPosition(
+            latitude = 47.4809967,
+            longitude = 8.2115859,
+            altitude = 522.0
+        )
+    )
 
     /**
      * Weather Objects
@@ -137,6 +143,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     var sensorLux by mutableStateOf(0.0f)
     var accelerometerData by mutableStateOf("getting xyz")
     var gameLux by mutableStateOf(0.0)
+
+    /**
+     * ButtonStates
+     */
+
+    var luxButton by mutableStateOf(0.0f)
+    var loveButton by mutableStateOf(0.0f)
+    var fertilizerButton by mutableStateOf(0.0f)
+    var waterButton by mutableStateOf(0.0f)
 
 
     init {
@@ -168,7 +183,19 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         checkLove()
         checkFertilizer()
         checkWater()
+        updateButton()
         firebaseConnector.updateGameState(gameState)
+    }
+
+
+    /**
+     * Update button heights
+     */
+    private fun updateButton() {
+        luxButton = calcButtonHeight(gameState.playerState.lux)
+        loveButton = calcButtonHeight(gameState.playerState.love)
+        fertilizerButton = calcButtonHeight(gameState.playerState.fertilizer)
+        waterButton = calcButtonHeight(gameState.playerState.water)
     }
 
 
@@ -231,23 +258,31 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      */
     private fun dataLoop() {
         gpsConnector.getLocation(
-                onSuccess = {
+            onSuccess = {
 
-                    Log.d(TAG, "position data: ${it}")
-                    position = it
-                    gameState.playerState.lastPosition = it
-                },
-                onFailure = {
-                    position = GeoPosition(latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0)
-                },
-                onPermissionDenied = {
-                    val permissions = arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-                    ActivityCompat.requestPermissions(activity, permissions, 10)
-                    position = GeoPosition(latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0)
-                }
+                Log.d(TAG, "position data: ${it}")
+                position = it
+                gameState.playerState.lastPosition = it
+            },
+            onFailure = {
+                position = GeoPosition(
+                    latitude = 47.48124530209937,
+                    longitude = 8.211087703634524,
+                    altitude = 522.0
+                )
+            },
+            onPermissionDenied = {
+                val permissions = arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+                ActivityCompat.requestPermissions(activity, permissions, 10)
+                position = GeoPosition(
+                    latitude = 47.48124530209937,
+                    longitude = 8.211087703634524,
+                    altitude = 522.0
+                )
+            }
         )
 
         //Todo check on real device
@@ -255,7 +290,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
         loadWeatherData(position.latitude, position.longitude)
 
-        Log.d(TAG, "Data Looped runned, current weather: ${cWeather.hourWeather.state}, Day: ${dark}")
+        Log.d(
+            TAG,
+            "Data Looped runned, current weather: ${cWeather.hourWeather.state}, Day: ${dark}"
+        )
     }
 
     /**
@@ -271,7 +309,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private fun loadWeatherData(latitude: Double, longitude: Double) {
 
         val urlString =
-                "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=${getAPIKey()}&units=metric"
+            "https://api.openweathermap.org/data/2.5/onecall?lat=$latitude&lon=$longitude&appid=${getAPIKey()}&units=metric"
 
         Log.d(TAG, urlString)
 
@@ -281,7 +319,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             val weatherJSON = apiConnector.getJSONString(url)
             val weatherJSONObject = JSONObject(weatherJSON)
             val currentWeather = weatherJSONObject.getJSONObject("current")
-            val currentWeatherWeather = JSONObject(currentWeather.getJSONArray("weather")[0].toString())
+            val currentWeatherWeather =
+                JSONObject(currentWeather.getJSONArray("weather")[0].toString())
 
             val calendar = Calendar.getInstance()
             calendar[Calendar.MINUTE] = 0
@@ -289,32 +328,32 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             calendar[Calendar.MILLISECOND] = 0
 
             val weatherFacts = WeatherFacts(
-                    temperature = currentWeather.getLong("temp").toFloat(),
-                    apparentTemperature = currentWeather.getLong("feels_like").toInt(),
-                    precipitation = 0.0F,//minutelyWeather.getLong("precipitation").toFloat(),
-                    humidity = currentWeather.getLong("humidity").toFloat(),
-                    windSpeed = currentWeather.getLong("wind_speed").toFloat(),
-                    cloudCover = currentWeather.getLong("clouds").toFloat(),
-                    pressure = currentWeather.getLong("pressure").toFloat(),
-                    visibility = currentWeather.getLong("visibility").toFloat(),
-                    uvIndex = currentWeather.getLong("uvi").toInt(),
-                    dewPoint = currentWeather.getLong("dew_point").toInt(),
-                    state = getWeatherState(currentWeatherWeather.getLong("id").toInt()),
+                temperature = currentWeather.getLong("temp").toFloat(),
+                apparentTemperature = currentWeather.getLong("feels_like").toInt(),
+                precipitation = 0.0F,//minutelyWeather.getLong("precipitation").toFloat(),
+                humidity = currentWeather.getLong("humidity").toFloat(),
+                windSpeed = currentWeather.getLong("wind_speed").toFloat(),
+                cloudCover = currentWeather.getLong("clouds").toFloat(),
+                pressure = currentWeather.getLong("pressure").toFloat(),
+                visibility = currentWeather.getLong("visibility").toFloat(),
+                uvIndex = currentWeather.getLong("uvi").toInt(),
+                dewPoint = currentWeather.getLong("dew_point").toInt(),
+                state = getWeatherState(currentWeatherWeather.getLong("id").toInt()),
 
 
-                    )
+                )
             cWeather = CurrentWeather(
-                    time = calendar.time,
-                    hourWeather = weatherFacts,
-                    sunrise = formatUnix(currentWeather.getString("sunrise")),
-                    sunset = formatUnix(currentWeather.getString("sunset")),
-                    minTemperature = 0,//dailyWeatherTemp.getInt("min"),
-                    maxTemperature = 0,//dailyWeatherTemp.getInt("max")
+                time = calendar.time,
+                hourWeather = weatherFacts,
+                sunrise = formatUnix(currentWeather.getString("sunrise")),
+                sunset = formatUnix(currentWeather.getString("sunset")),
+                minTemperature = 0,//dailyWeatherTemp.getInt("min"),
+                maxTemperature = 0,//dailyWeatherTemp.getInt("max")
             )
 
             calculateDayOrNight(
-                    currentWeather.getString("sunrise"),
-                    currentWeather.getString("sunset")
+                currentWeather.getString("sunrise"),
+                currentWeather.getString("sunset")
             )
 
         }
@@ -358,13 +397,13 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      */
     private fun calculateDayOrNight(sunriseTimestamp: String, sunsetTimestamp: String) {
         val sunrise = Instant
-                .ofEpochSecond(sunriseTimestamp.toLong())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
+            .ofEpochSecond(sunriseTimestamp.toLong())
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
         val sunset = Instant
-                .ofEpochSecond(sunsetTimestamp.toLong())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
+            .ofEpochSecond(sunsetTimestamp.toLong())
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
         val currentDateTime = ZonedDateTime.now().toLocalDateTime()
         lastCheck = currentDateTime.toString()
         dark = !(currentDateTime > sunrise && currentDateTime < sunset)
@@ -380,19 +419,19 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     fun startLoops() {
         fixedRateTimer(
-                name = "plantagotchi-data-loop",
-                initialDelay = 0,
-                period = 60000,
-                daemon = true
+            name = "plantagotchi-data-loop",
+            initialDelay = 0,
+            period = 60000,
+            daemon = true
         ) {
             dataLoop()
         }
 
         fixedRateTimer(
-                name = "plantagotchi-game-loop",
-                initialDelay = 0,
-                period = 1000,
-                daemon = true
+            name = "plantagotchi-game-loop",
+            initialDelay = 0,
+            period = 1000,
+            daemon = true
         ) {
             gameLoop()
         }
@@ -400,20 +439,20 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     fun loadGameState() {
         firebaseConnector
-                .loadInitialGameState
-                .whenComplete {
-                    when (it) {
-                        is Promise.Result.Success -> {
-                            gameState.playerId = it.value.playerId
-                            gameState.playerState.lux = it.value.playerState.lux
-                            gameState.playerState.love = it.value.playerState.love
-                            gameState.playerState.fertilizer = it.value.playerState.fertilizer
-                            gameState.playerState.water = it.value.playerState.water
-                        }
-                        is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
+            .loadInitialGameState
+            .whenComplete {
+                when (it) {
+                    is Promise.Result.Success -> {
+                        gameState.playerId = it.value.playerId
+                        gameState.playerState.lux = it.value.playerState.lux
+                        gameState.playerState.love = it.value.playerState.love
+                        gameState.playerState.fertilizer = it.value.playerState.fertilizer
+                        gameState.playerState.water = it.value.playerState.water
                     }
-                    startLoops()
+                    is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
                 }
+                startLoops()
+            }
     }
 
     fun createNewGameState() {
@@ -429,9 +468,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             when (it) {
                 is Promise.Result.Success -> {
 
-                    Log.d(TAG, "******************************** START *****************************")
+                    Log.d(
+                        TAG,
+                        "******************************** START *****************************"
+                    )
                     Log.d(TAG, "Created new GameState: ${it.value.playerId}")
-                    Log.d(TAG, "******************************** END ******************************")
+                    Log.d(
+                        TAG,
+                        "******************************** END ******************************"
+                    )
                     AppPreferences.player_id = it.value.playerId
                     gameState.playerId = it.value.playerId
 
@@ -447,5 +492,11 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 AppPreferences.player_id.isNotEmpty()
         Log.d(TAG, "playerIsSet: $playerIsSet")
         return playerIsSet
+    }
+
+    fun calcButtonHeight(percent: Double): Float {
+        // 100 percent - actuel percent * height of bubble + delta for correct position
+        return (((100 - percent) * 1.1) + 55).toFloat()
+
     }
 }
