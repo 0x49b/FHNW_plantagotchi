@@ -10,10 +10,9 @@ import fhnw.ws6c.plantagotchi.data.state.GameState
 
 class FirebaseConnector(var appPreferences: AppPreferences) {
 
-    private val TAG = "FirebaseConnector"
+    private val TAG = "PlantaGotchiFirebaseConnector"
     private val db = Firebase.firestore
     private val gameStateTable = "gameState"
-
 
 
     //Todo needs refactoring
@@ -35,17 +34,16 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
             .update(gameState.toHashMap() as Map<String, Any>)
     }
 
-    /*val createNewGameStatePromise = Promise<GameState, Exception>{ gameState ->
+    val createGameState = Promise<GameState, Exception> {
         db.collection(gameStateTable)
-            .add(gameState.toHashMap())
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "GameState created for ${documentReference.id}")
-                appPreferences.player_id = documentReference.id
+            .add(GameState())
+            .addOnSuccessListener { result ->
+                val gs = GameState()
+                gs.playerId = result.id
+                resolve(gs)
             }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-            }
-    }*/
+            .addOnFailureListener { except -> reject(except) }
+    }
 
     val loadInitialGameState = Promise<GameState, Exception> {
         db.collection(gameStateTable)
@@ -53,7 +51,14 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
             .get()
             .addOnSuccessListener { result ->
                 val gs = GameState()
-                gs.playerState.lux = result.get("playerState.lux") as Double
+
+                Log.d(TAG, "Loaded GameState from Firebase: ${result.id}")
+                gs.playerId = result.id
+                gs.playerState.lux = result.getDouble("playerState.lux")!!
+                gs.playerState.love = result.getDouble("playerState.love")!!
+                gs.playerState.fertilizer = result.getDouble("playerState.fertilizer")!!
+                gs.playerState.water = result.getDouble("playerState.water")!!
+
                 resolve(gs)
             }.addOnFailureListener { except ->
                 reject(except)

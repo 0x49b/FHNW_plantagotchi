@@ -58,11 +58,11 @@ private val appDayColors = Colors(
 
 @Composable
 fun PlantagotchiTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     content: @Composable() () -> Unit
 ) {
     MaterialTheme(
-        colors = appDayColors,
+        colors = appNightColors,//if(darkTheme) appNightColors.copy() else appDayColors.copy(),
         typography = typography,
         shapes = shapes,
         content = content

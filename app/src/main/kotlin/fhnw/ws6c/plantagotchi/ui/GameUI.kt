@@ -3,6 +3,7 @@ package fhnw.ws6c.plantagotchi.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -13,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -32,99 +35,105 @@ import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
 @Composable
 fun GameUI(model: PlantagotchiModel) {
     with(model) {
-            PlantagotchiTheme(darkTheme = dark) {
+        PlantagotchiTheme(darkTheme = dark) {
 
-                Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
 
-                    DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
+                DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
 
-                    ConstraintLayout(
+                ConstraintLayout(
                         modifier = Modifier
-                            .fillMaxSize()
-                    ) {
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    detectDragGestures { change, dragAmount ->
+                                        change.consumeAllChanges()
+                                        addLove(dragAmount)
+                                    }
+                                }
+                ) {
 
-                        val (ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()
+                    val (ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()
 
 
-                        GlideImage(
+                    GlideImage(
                             imageModel = R.drawable.ic_ground,
                             contentDescription = "ground",
                             modifier = Modifier
-                                .height(128.dp)
-                                .constrainAs(ground) {
-                                    bottom.linkTo(parent.bottom, 0.dp)
-                                    start.linkTo(parent.start, 0.dp)
-                                }
-                        )
+                                    .height(128.dp)
+                                    .constrainAs(ground) {
+                                        bottom.linkTo(parent.bottom, 0.dp)
+                                        start.linkTo(parent.start, 0.dp)
+                                    }
+                    )
 
-                        Image(
+                    Image(
                             painter = painterResource(id = R.drawable.chest),
                             contentDescription = "chest",
                             modifier = Modifier
-                                .padding(top = 35.dp, end = 8.dp)
-                                .size(40.dp)
+                                    .padding(top = 35.dp, end = 8.dp)
+                                    .size(40.dp)
 
-                                .constrainAs(chest) {
-                                    end.linkTo(parent.end, 5.dp)
-                                    top.linkTo(parent.top, 5.dp)
-                                }
-                                .clickable { model.setWeatherState(WeatherState.RAIN) }
-                        )
+                                    .constrainAs(chest) {
+                                        end.linkTo(parent.end, 5.dp)
+                                        top.linkTo(parent.top, 5.dp)
+                                    }
+                                    .clickable { model.setWeatherState(WeatherState.RAIN) }
+                    )
 
-                        Box(
+                    Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
 
-                                .constrainAs(coin_counter) {
-                                    top.linkTo(parent.top, 0.dp)
-                                }
-                        ) {
+                                    .constrainAs(coin_counter) {
+                                        top.linkTo(parent.top, 0.dp)
+                                    }
+                    ) {
 
-                            Image(
+                        Image(
                                 painter = painterResource(id = R.drawable.coint_counter),
                                 contentDescription = "coin_counter",
                                 modifier = Modifier
-                                    .padding(start = 20.dp)
-                                    .size(120.dp)
-                                    .clickable { model.setWeatherState(WeatherState.THUNDERSTORM) }
-                            )
+                                        .padding(start = 20.dp)
+                                        .size(120.dp)
+                                        .clickable { model.setWeatherState(WeatherState.THUNDERSTORM) }
+                        )
 
-                            Text(
+                        Text(
                                 text = "9999",
                                 color = Color.Black,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .padding(start = 25.dp)
+                                        .padding(start = 25.dp)
 
-                            )
-                        }
+                        )
+                    }
 
-                        Image(painterResource(id = R.drawable.ic_plant1),
+                    Image(painterResource(id = R.drawable.ic_plant1),
                             contentDescription = "the_plant",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .constrainAs(plant) {
-                                    bottom.linkTo(pot.top, (-2).dp)
-                                })
+                                    .fillMaxWidth()
+                                    .constrainAs(plant) {
+                                        bottom.linkTo(pot.top, (-2).dp)
+                                    })
 
-                        Image(painterResource(id = R.drawable.ic_pot12),
+                    Image(painterResource(id = R.drawable.ic_pot12),
                             contentDescription = "the_pot",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .constrainAs(pot) {
-                                    bottom.linkTo(ground.top, (-48).dp)
-                                })
-                        BottomIndicator(
+                                    .fillMaxWidth()
+                                    .constrainAs(pot) {
+                                        bottom.linkTo(ground.top, (-48).dp)
+                                    })
+                    BottomIndicator(
                             model = model,
                             modifier = Modifier.constrainAs(bottomBar) {
                                 bottom.linkTo(parent.bottom, 5.dp)
                             }
-                        )
-
-                    }
+                    )
 
                 }
+
             }
+        }
     }
 }
 
@@ -132,146 +141,116 @@ fun GameUI(model: PlantagotchiModel) {
 fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
     with(model) {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 10.dp)
+                modifier = modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 10.dp)
         ) {
 
             Text(
-                text = "What does your plant need?",
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-                   .padding(top= 670.dp)
-
+                    text = "What does your plant need?",
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
 
             )
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    IndicatorBubble(model = model)
-                }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                IndicatorBubble(model, title = "lux", color = Color(0xFFFFEB3B))
             }
         }
+    }
 }
 
 @Composable
-fun IndicatorBubble(model: PlantagotchiModel) {
+fun IndicatorBubble(model: PlantagotchiModel, title: String, color: Color) {
     with(model) {
-
-
-        Box(modifier = Modifier.fillMaxSize()) {
-
-
-
-            ConstraintLayout(
+        Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                val (button_love, heart, button_fertilizer, fertilizer, button_water, water,button_sunshine,sunshine) = createRefs()
+                        .padding(start = 30.dp)
 
-                Image(
+        ) {
+
+            Image(
                     painterResource(id = R.drawable.button_love),
                     contentDescription = "button_love",
                     modifier = Modifier
-                        .size(65.dp)
-                        .constrainAs(button_love) {
-                            bottom.linkTo(parent.bottom,0.dp)
-                            start.linkTo(parent.start, 30.dp)
+                            .size(65.dp)
+            )
 
-                        }
-                )
-
-                Image(
+            Image(
                     painterResource(id = R.drawable.heart),
                     contentDescription = "heart",
                     modifier = Modifier
-                        .size(25.dp)
-                        .constrainAs(heart) {
-                            bottom.linkTo(parent.bottom, 20.dp)
-                            start.linkTo(parent.start, 50.dp)
-                        }
-                )
+                            .size(25.dp)
+            )
 
+        }
 
-                Image(
+        Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                        .padding(start = 20.dp)
+        ) {
+
+            Image(
                     painterResource(id = R.drawable.button_fertilizer),
                     contentDescription = "button_fertilizer",
                     modifier = Modifier
-                        .size(65.dp)
-                        .constrainAs(button_fertilizer) {
-                            bottom.linkTo(parent.bottom,0.dp)
-                            start.linkTo(parent.start, 120.dp)
+                            .size(65.dp)
+            )
 
-                        }
-
-                )
-
-                Image(
+            Image(
                     painterResource(id = R.drawable.fertilizer),
                     contentDescription = "fertilizer",
                     modifier = Modifier
-                        .size(25.dp)
-                        .constrainAs(fertilizer) {
-                            bottom.linkTo(parent.bottom, 20.dp)
-                            start.linkTo(parent.start, 140.dp)
+                            .size(25.dp)
+            )
 
-                        }
+        }
 
-                )
+        Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                        .padding(start = 20.dp)
+        ) {
 
-                Image(
+            Image(
                     painterResource(id = R.drawable.button_water),
                     contentDescription = "button_water",
                     modifier = Modifier
-                        .size(65.dp)
-                        .constrainAs(button_water) {
-                            bottom.linkTo(parent.bottom,0.dp)
-                            end.linkTo(parent.end, 120.dp)
+                            .size(65.dp)
+            )
 
-                        }
-                )
-
-                Image(
+            Image(
                     painterResource(id = R.drawable.water),
                     contentDescription = "water",
                     modifier = Modifier
-                        .size(25.dp)
-                        .constrainAs(water) {
-                            bottom.linkTo(parent.bottom, 20.dp)
-                            end.linkTo(parent.end, 140.dp)
+                            .size(25.dp)
+            )
 
-                        }
-                        .clickable { model.setActualWeather() }
-                )
+        }
 
+        Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                        .padding(start = 20.dp)
+        ) {
 
-
-                Image(
+            Image(
                     painterResource(id = R.drawable.button_sunshine),
                     contentDescription = "button_sunshine",
                     modifier = Modifier
-                        .size(65.dp)
-                        .constrainAs(button_sunshine) {
-                            bottom.linkTo(parent.bottom,0.dp)
-                            end.linkTo(parent.end, 30.dp)
+                            .size(65.dp)
+            )
 
-                        }
-                )
-
-                Image(
+            Image(
                     painterResource(id = R.drawable.sunshine),
                     contentDescription = "sunshine",
                     modifier = Modifier
-                        .size(25.dp)
-                        .constrainAs(sunshine) {
-                            bottom.linkTo(parent.bottom,20.dp)
-                            end.linkTo(parent.end, 50.dp)
+                            .size(25.dp)
+            )
 
-                        }
-                        .clickable { model.setWeatherState(WeatherState.CLEAR_SKY) }
-                )
-
-            }
         }
     }
 }

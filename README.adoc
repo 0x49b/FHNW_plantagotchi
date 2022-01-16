@@ -5,6 +5,8 @@
 * Joyce Hänggi (joycehaenggi)
 * Florian Thiévent (lichtwellenreiter)
 
+=== Attribution
+* Weather Particles based on https://github.com/fidloo/flux
 
 === Links zu API's
 * Wetter API: https://openweathermap.org/current#geo
