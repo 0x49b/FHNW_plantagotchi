@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.core.app.ActivityCompat
 import com.shopify.promises.Promise
-import fhnw.ws6c.R
 import fhnw.ws6c.plantagotchi.AppPreferences
 import fhnw.ws6c.plantagotchi.data.GeoPosition
 import fhnw.ws6c.plantagotchi.data.connectors.ApiConnector
@@ -33,7 +32,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat

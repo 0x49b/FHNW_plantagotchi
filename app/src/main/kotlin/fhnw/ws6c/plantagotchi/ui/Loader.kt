@@ -2,6 +2,7 @@ package fhnw.ws6c.plantagotchi.ui
 
 import android.app.Activity
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
-import androidx.compose.foundation.Image
 
 @Composable
 fun LoadingScreen(model: PlantagotchiModel) {
