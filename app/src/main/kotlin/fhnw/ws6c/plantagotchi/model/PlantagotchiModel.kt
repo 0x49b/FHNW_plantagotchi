@@ -282,16 +282,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 gameState.playerState.lastPosition = it
             },
             onFailure = {
-
-                // FHNW
-                position = GeoPosition(
-                    latitude = 47.48124530209937,
-                    longitude = 8.211087703634524,
-                    altitude = 522.0
-                )
-
-                // GoldenGate Bridge
-                // position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
+                position = GeoPosition( latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0 )
             },
             onPermissionDenied = {
                 val permissions = arrayOf(
@@ -301,6 +292,11 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 ActivityCompat.requestPermissions(activity, permissions, 10)
             }
         )
+        // FHNW
+        // position = GeoPosition( latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0 )
+
+        // GoldenGate
+        // position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
 
         loadWeatherData(position.latitude, position.longitude)
         Log.d(
@@ -427,6 +423,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
      * Start all Loops for GameData and WeatherData
      */
     private fun startLoops() {
+        dataLoop()
+        gameLoop()
+
         fixedRateTimer(
             name = "plantagotchi-data-loop",
             initialDelay = 0,
