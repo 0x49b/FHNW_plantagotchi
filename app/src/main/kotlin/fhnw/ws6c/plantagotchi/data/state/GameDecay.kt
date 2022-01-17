@@ -1,6 +1,6 @@
 package fhnw.ws6c.plantagotchi.data.state
 
-class GameDecay {
+abstract class GameDecay {
 
     /**
      * Decays for LUX, CO2, WATER, FERTILIZER

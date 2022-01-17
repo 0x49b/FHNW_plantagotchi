@@ -48,15 +48,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
 
     /**
-     * Weather Things clean up
-     */
-
-    var oldSelectedWeatherTime: Date = Date()
-    private val _particleAnimationIteration = MutableStateFlow(1L)
-    val particleAnimationIteration: StateFlow<Long> = _particleAnimationIteration
-
-
-    /**
      * Generic Stuff
      */
     private val TAG = "PlantaGotchiModel"
@@ -103,9 +94,14 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private val WATER_DECAY = 100.0f / (86400.0f * 2.0f)
 
     /**
+     * Weather Objects & Particle Things
      * OpenWeather API Keys
      */
-    val openWeatherAPIKEY = arrayOf(
+    var cWeather by mutableStateOf(CurrentWeather.getDefault())
+    var oldSelectedWeatherTime: Date = Date()
+    private val _particleAnimationIteration = MutableStateFlow(1L)
+    val particleAnimationIteration: StateFlow<Long> = _particleAnimationIteration
+    private val openWeatherAPIKEY = arrayOf(
         "18b075743cb869bcc0fe9f4977f3696e",
         "89256d338d3202fa44b7deac9b0c208a",
         "1abd7b50c169e42776138698accfefc8",
@@ -115,7 +111,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     )
 
     /**
-     * Position Objects
+     * Position Objects, initial is FHNW
      */
     var position by mutableStateOf(
         GeoPosition(
@@ -125,31 +121,21 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         )
     )
 
-    /**
-     * Weather Objects
-     */
-    var cWeather by mutableStateOf(CurrentWeather.getDefault())
-    var currentWeather by mutableStateOf("Getting current weather ...")
-
 
     /**
      * Currently used in the Frontend, can be removed afterwards (before MVP)
      */
-    var nightDay by mutableStateOf("Checking Night or Day ...")
     var dark by mutableStateOf(false)
-    var lastCheck by mutableStateOf("Never checked by now. Wait for next tick")
     var sensorLux by mutableStateOf(0.0f)
-    var accelerometerData by mutableStateOf("getting xyz")
-    var gameLux by mutableStateOf(0.0)
 
     /**
      * ButtonStates
      */
-
     var luxButton by mutableStateOf(0.0f)
     var loveButton by mutableStateOf(0.0f)
     var fertilizerButton by mutableStateOf(0.0f)
     var waterButton by mutableStateOf(0.0f)
+    var coins by mutableStateOf(0)
 
 
     init {
@@ -201,6 +187,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         if (sensorLux > 1000) {
             if (gameState.playerState.lux <= 100.0) {
                 gameState.playerState.lux += 0.1
+                gainCoins()
             } else {
                 gameState.playerState.lux = 100.0
             }
@@ -227,6 +214,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         if (Math.abs(dragAmount.y) > 25.0f) {
             if (gameState.playerState.love < 100.0f) {
                 gameState.playerState.love += 1.0f
+                gainCoins()
             } else {
                 gameState.playerState.love = 100.0
             }
@@ -250,6 +238,11 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
+    private fun gainCoins() {
+        coins += 1
+        gameState.playerState.coins = coins
+    }
+
 
     /**
      * Data Loop to get Position and Weather Data on a regular Basis
@@ -258,7 +251,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         gpsConnector.getLocation(
             onSuccess = {
 
-                Log.d(TAG, "position data: ${it}")
+                Log.d(TAG, "position data: $it")
                 position = it
                 gameState.playerState.lastPosition = it
             },
@@ -360,12 +353,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         cWeather.hourWeather.state = state
     }
 
-    fun setActualWeather() {
-        dataLoop()
-    }
-
     private fun getWeatherState(weatherId: Int): WeatherState {
-
         return when (weatherId) {
             200, 201, 202, 210, 211, 212, 221, 230, 231, 232, 781 -> WeatherState.THUNDERSTORM
             300, 301, 302, 310, 311, 312, 313, 314, 321, 500 -> WeatherState.LIGHT_RAIN
@@ -378,8 +366,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             804 -> WeatherState.MOSTLY_CLOUDY
             else -> WeatherState.CLEAR_SKY
         }
-
-
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -402,7 +388,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
         val currentDateTime = ZonedDateTime.now().toLocalDateTime()
-        lastCheck = currentDateTime.toString()
         dark = !(currentDateTime > sunrise && currentDateTime < sunset)
     }
 
@@ -414,7 +399,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    fun startLoops() {
+    /**
+     * Start all Loops for GameData and WeatherData
+     */
+    private fun startLoops() {
         fixedRateTimer(
             name = "plantagotchi-data-loop",
             initialDelay = 0,
@@ -434,7 +422,10 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    fun loadGameState() {
+    /**
+     * Load the GameState from Firebase
+     */
+    private fun loadGameState() {
         firebaseConnector
             .loadInitialGameState
             .whenComplete {
@@ -445,6 +436,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                         gameState.playerState.love = it.value.playerState.love
                         gameState.playerState.fertilizer = it.value.playerState.fertilizer
                         gameState.playerState.water = it.value.playerState.water
+                        gameState.playerState.coins = it.value.playerState.coins
+                        coins = gameState.playerState.coins
                     }
                     is Promise.Result.Error -> it.error.message?.let { it1 -> Log.e(TAG, it1) }
                 }
@@ -452,48 +445,47 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             }
     }
 
-    fun createNewGameState() {
+    /**
+     * Create a new Gamestate in the Firebase
+     */
+    private fun createNewGameState() {
 
         gameState.playerState.love = 0.0
         gameState.playerState.fertilizer = 100.0
         gameState.playerState.lux = 100.0
         gameState.playerState.water = 100.0
+        gameState.playerState.coins = 0
         gameState.playerState.lastPosition = position
 
         firebaseConnector.createGameState.whenComplete { it ->
-
             when (it) {
                 is Promise.Result.Success -> {
-
-                    Log.d(
-                        TAG,
-                        "******************************** START *****************************"
-                    )
-                    Log.d(TAG, "Created new GameState: ${it.value.playerId}")
-                    Log.d(
-                        TAG,
-                        "******************************** END ******************************"
-                    )
                     AppPreferences.player_id = it.value.playerId
                     gameState.playerId = it.value.playerId
-
                     startLoops()
+                }
+                is Promise.Result.Error -> {
+                    Log.e(TAG, "Could not receive GameState from Firebase")
                 }
             }
         }
     }
 
+    /**
+     * Check if there is a Player in the SharedPrefs
+     */
     private fun isPlayerSet(): Boolean {
         val playerIsSet = AppPreferences.contains("PLAYER_ID") &&
                 AppPreferences.player_id.isNotBlank() &&
                 AppPreferences.player_id.isNotEmpty()
-        Log.d(TAG, "playerIsSet: $playerIsSet")
         return playerIsSet
     }
 
+    /**
+     * helper function to calculate the Height of the indicators in the Frontend
+     */
     fun calcButtonHeight(percent: Double): Float {
         // 100 percent - actuel percent * height of bubble + delta for correct position
         return (((100 - percent) * 1.1) + 55).toFloat()
-
     }
 }

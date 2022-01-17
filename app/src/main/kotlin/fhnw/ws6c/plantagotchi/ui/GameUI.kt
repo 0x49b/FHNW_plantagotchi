@@ -12,7 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
@@ -74,13 +77,12 @@ fun GameUI(model: PlantagotchiModel) {
                                 end.linkTo(parent.end, 5.dp)
                                 top.linkTo(parent.top, 5.dp)
                             }
-                            .clickable { model.setWeatherState(WeatherState.RAIN) }
+                            .clickable { setWeatherState(WeatherState.RAIN) }
                     )
 
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-
                             .constrainAs(coin_counter) {
                                 top.linkTo(parent.top, 0.dp)
                             }
@@ -92,11 +94,11 @@ fun GameUI(model: PlantagotchiModel) {
                             modifier = Modifier
                                 .padding(start = 20.dp)
                                 .size(120.dp)
-                                .clickable { model.setWeatherState(WeatherState.THUNDERSTORM) }
+                                .clickable { setWeatherState(WeatherState.THUNDERSTORM) }
                         )
 
                         Text(
-                            text = "9999",
+                            text = "$coins",
                             color = Color.Black,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -126,9 +128,7 @@ fun GameUI(model: PlantagotchiModel) {
                             bottom.linkTo(parent.bottom, 5.dp)
                         }
                     )
-
                 }
-
             }
         }
     }
@@ -136,23 +136,24 @@ fun GameUI(model: PlantagotchiModel) {
 
 @Composable
 fun BottomIndicator(model: PlantagotchiModel, modifier: Modifier) {
-    with(model) {
-        Column(
-            modifier = modifier
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp, bottom = 10.dp)
+    ) {
+
+        Text(
+            text = "What does your plant need?",
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 10.dp)
-        ) {
+                .padding(bottom = 2.dp)
+        )
 
-            Text(
-                text = "What does your plant need?",
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                IndicatorBubble(model)
-            }
+        Row(modifier = Modifier
+            .fillMaxWidth()) {
+            IndicatorBubble(model)
         }
     }
 }
@@ -162,13 +163,9 @@ fun IndicatorBubble(model: PlantagotchiModel) {
     with(model) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .padding(start = 30.dp)
-
         ) {
 
             StateBubble(
-                model = model,
                 value = loveButton,
                 color = Color(0xFFD77BBA),
                 img = R.drawable.heart
@@ -182,7 +179,6 @@ fun IndicatorBubble(model: PlantagotchiModel) {
         ) {
 
             StateBubble(
-                model = model,
                 value = fertilizerButton,
                 color = Color(0xFFEEC39A),
                 img = R.drawable.fertilizer
@@ -196,7 +192,6 @@ fun IndicatorBubble(model: PlantagotchiModel) {
         ) {
 
             StateBubble(
-                model = model,
                 value = waterButton,
                 color = Color(0xFF5FCDE4),
                 img = R.drawable.water
@@ -208,9 +203,9 @@ fun IndicatorBubble(model: PlantagotchiModel) {
             modifier = Modifier
                 .padding(start = 20.dp)
         ) {
+
             StateBubble(
-                model = model,
-                value = luxButton,
+                value = waterButton,
                 color = Color(0xFFFFEB57),
                 img = R.drawable.sunshine
             )
@@ -220,16 +215,16 @@ fun IndicatorBubble(model: PlantagotchiModel) {
 
 
 @Composable
-fun StateBubble(model: PlantagotchiModel, value: Float, color: Color, img: Int) {
+fun StateBubble(value: Float, color: Color, img: Int) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(80.dp)
     ) {
 
-        ConstraintLayout() {
+        ConstraintLayout {
 
-            val (cvs, icn, bg) = createRefs()
+            val (cvs, icn) = createRefs()
 
             Canvas(
                 modifier = Modifier
@@ -249,15 +244,16 @@ fun StateBubble(model: PlantagotchiModel, value: Float, color: Color, img: Int) 
                     radius = size.minDimension / 4
                 )
                 drawRect(
-                    color = Color.Black,
-                    size = Size(width = 100.dp.toPx(), height = value),
-                    blendMode = BlendMode.DstOut
+                    color = Color(0xFF3F282F),
+                    size = Size(width = 45.dp.toPx(), height = value - 50.0f),
+                    topLeft = Offset(x=50.0f, y=50.0f)
+                    //blendMode = BlendMode.DstOut
                 )
             }
 
             Image(
                 painter = painterResource(id = img),
-                contentDescription = "sunshine_indicator",
+                contentDescription = "${img}_indicator",
                 modifier = Modifier
                     .size(25.dp)
                     .constrainAs(icn) {
@@ -268,7 +264,7 @@ fun StateBubble(model: PlantagotchiModel, value: Float, color: Color, img: Int) 
 
             Image(
                 painter = painterResource(id = R.drawable.ic_button_bg),
-                contentDescription = "bg_button",
+                contentDescription = "${img}_bg_button",
                 modifier = Modifier
                     .size(120.dp)
                     .padding((17.5).dp)

@@ -58,6 +58,7 @@ class FirebaseConnector(var appPreferences: AppPreferences) {
                 gs.playerState.love = result.getDouble("playerState.love")!!
                 gs.playerState.fertilizer = result.getDouble("playerState.fertilizer")!!
                 gs.playerState.water = result.getDouble("playerState.water")!!
+                gs.playerState.coins = result.get("playerState.coins").toString().toInt()
 
                 resolve(gs)
             }.addOnFailureListener { except ->
