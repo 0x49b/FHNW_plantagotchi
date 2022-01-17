@@ -276,7 +276,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     private fun dataLoop() {
         gpsConnector.getLocation(
             onSuccess = {
-
                 Log.d(TAG, "position data: $it")
                 position = it
                 gameState.playerState.lastPosition = it
@@ -293,15 +292,15 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             }
         )
         // FHNW
-        // position = GeoPosition( latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0 )
+        //position = GeoPosition( latitude = 47.48124530209937, longitude = 8.211087703634524, altitude = 522.0 )
 
         // GoldenGate
-        // position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
+        //position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
 
         loadWeatherData(position.latitude, position.longitude)
         Log.d(
             TAG,
-            "Data Looped runned, current weather: ${cWeather.hourWeather.state}, Day: ${dark}"
+            "Data Looped runned, current weather: ${cWeather.hourWeather.state}, Day: $dark"
         )
     }
 
@@ -371,6 +370,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
 
     fun setWeatherState(state: WeatherState) {
         cWeather.hourWeather.state = state
+        dataLoop()
     }
 
     private fun getWeatherState(weatherId: Int): WeatherState {

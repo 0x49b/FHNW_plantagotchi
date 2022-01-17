@@ -5,8 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -29,105 +30,130 @@ import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
+import kotlinx.coroutines.launch
 
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun GameUI(model: PlantagotchiModel) {
     with(model) {
+
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+        )
+        val coroutineScope = rememberCoroutineScope()
+
+
         PlantagotchiTheme(darkTheme = dark) {
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            BottomSheetScaffold(
+                scaffoldState = bottomSheetScaffoldState,
+                sheetContent = {
+                    AboutScreen()
+                }, sheetPeekHeight = 0.dp
+            ) {
 
-                DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
+                Box(modifier = Modifier.fillMaxSize()) {
 
-                ConstraintLayout(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectDragGestures { change, dragAmount ->
-                                change.consumeAllChanges()
-                                addLove(dragAmount)
-                            }
-                        }
-                ) {
+                    DynamicWeatherSection(currentWeather = cWeather, viewModel = model)
 
-                    val (ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()
-
-
-                    GlideImage(
-                        imageModel = R.drawable.ic_ground,
-                        contentDescription = "ground",
+                    ConstraintLayout(
                         modifier = Modifier
-                            .height(128.dp)
-                            .constrainAs(ground) {
-                                bottom.linkTo(parent.bottom, 0.dp)
-                                start.linkTo(parent.start, 0.dp)
-                            }
-                    )
-
-                    Image(
-                        painter = painterResource(id = R.drawable.chest),
-                        contentDescription = "chest",
-                        modifier = Modifier
-                            .padding(top = 35.dp, end = 8.dp)
-                            .size(40.dp)
-
-                            .constrainAs(chest) {
-                                end.linkTo(parent.end, 5.dp)
-                                top.linkTo(parent.top, 5.dp)
-                            }
-                            .clickable { setWeatherState(WeatherState.RAIN) }
-                    )
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .constrainAs(coin_counter) {
-                                top.linkTo(parent.top, 0.dp)
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consumeAllChanges()
+                                    addLove(dragAmount)
+                                }
                             }
                     ) {
 
-                        Image(
-                            painter = painterResource(id = R.drawable.coint_counter),
-                            contentDescription = "coin_counter",
+                        val (ground, pot, plant, chest, coin_counter, bottomBar) = createRefs()
+
+
+                        GlideImage(
+                            imageModel = R.drawable.ic_ground,
+                            contentDescription = "ground",
                             modifier = Modifier
-                                .padding(start = 20.dp)
-                                .size(120.dp)
-                                .clickable { setWeatherState(WeatherState.THUNDERSTORM) }
+                                .height(128.dp)
+                                .constrainAs(ground) {
+                                    bottom.linkTo(parent.bottom, 0.dp)
+                                    start.linkTo(parent.start, 0.dp)
+                                }
                         )
 
-                        Text(
-                            text = "$coins",
-                            color = Color.Black,
-                            textAlign = TextAlign.Center,
+                        Image(
+                            painter = painterResource(id = R.drawable.chest),
+                            contentDescription = "chest",
                             modifier = Modifier
-                                .padding(start = 25.dp)
+                                .padding(top = 35.dp, end = 8.dp)
+                                .size(40.dp)
 
+                                .constrainAs(chest) {
+                                    end.linkTo(parent.end, 5.dp)
+                                    top.linkTo(parent.top, 5.dp)
+                                }
+                                .clickable {
+                                    coroutineScope.launch {
+
+                                        if (bottomSheetScaffoldState.bottomSheetState.isCollapsed) {
+                                            bottomSheetScaffoldState.bottomSheetState.expand()
+                                        } else {
+                                            bottomSheetScaffoldState.bottomSheetState.collapse()
+                                        }
+                                    }
+                                }
+                        )
+
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .constrainAs(coin_counter) {
+                                    top.linkTo(parent.top, 0.dp)
+                                }
+                        ) {
+
+                            Image(
+                                painter = painterResource(id = R.drawable.coint_counter),
+                                contentDescription = "coin_counter",
+                                modifier = Modifier
+                                    .padding(start = 20.dp)
+                                    .size(120.dp)
+                            )
+
+                            Text(
+                                text = "$coins",
+                                color = Color.Black,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(start = 25.dp)
+
+                            )
+                        }
+
+                        Image(painterResource(id = R.drawable.ic_plant1),
+                            contentDescription = "the_plant",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(plant) {
+                                    bottom.linkTo(pot.top, (-2).dp)
+                                })
+
+                        Image(painterResource(id = R.drawable.ic_pot12),
+                            contentDescription = "the_pot",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(pot) {
+                                    bottom.linkTo(ground.top, (-48).dp)
+                                })
+                        BottomIndicator(
+                            model = model,
+                            modifier = Modifier.constrainAs(bottomBar) {
+                                bottom.linkTo(parent.bottom, 5.dp)
+                            }
                         )
                     }
-
-                    Image(painterResource(id = R.drawable.ic_plant1),
-                        contentDescription = "the_plant",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .constrainAs(plant) {
-                                bottom.linkTo(pot.top, (-2).dp)
-                            })
-
-                    Image(painterResource(id = R.drawable.ic_pot12),
-                        contentDescription = "the_pot",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .constrainAs(pot) {
-                                bottom.linkTo(ground.top, (-48).dp)
-                            })
-                    BottomIndicator(
-                        model = model,
-                        modifier = Modifier.constrainAs(bottomBar) {
-                            bottom.linkTo(parent.bottom, 5.dp)
-                        }
-                    )
                 }
             }
         }
