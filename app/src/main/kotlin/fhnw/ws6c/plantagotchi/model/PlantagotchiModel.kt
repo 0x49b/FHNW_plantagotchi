@@ -160,7 +160,6 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
     /**
      * The GameLoop to calculate all the Data for the Plantagotchi Experience
      */
-
     private fun gameLoop() {
         Log.d(TAG, "Current GameState: ${gameState.toJSON()}")
         checkLux()
@@ -182,7 +181,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         waterButton = calcButtonHeight(gameState.playerState.water)
     }
 
-
+    /**
+     * I wanna be daylight in your eyes
+     */
     private fun checkLux() {
         if (sensorLux > 1000) {
             if (gameState.playerState.lux <= 100.0) {
@@ -200,6 +201,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
+    /**
+     * Check if the user is petting his/her plant
+     */
     private fun checkLove() {
         if (gameState.playerState.love > 100.0) {
             gameState.playerState.love = 100.0
@@ -210,6 +214,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
+    /**
+     * Have some Love? Gve some!
+     */
     fun addLove(dragAmount: Offset) {
         if (Math.abs(dragAmount.y) > 25.0f) {
             if (gameState.playerState.love < 100.0f) {
@@ -221,6 +228,9 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
+    /**
+     * Basic Fertilizier Mechanics
+     */
     private fun checkFertilizer() {
         if (gameState.playerState.fertilizer > 0.0) {
             gameState.playerState.fertilizer -= FERTILIZER_DECAY
@@ -229,15 +239,31 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
         }
     }
 
-    // Todo When Raining then ++
+    /**
+     * You don't have to buy Water if it's raining #StopNestlé
+     */
     private fun checkWater() {
-        if (gameState.playerState.water > 0.0) {
-            gameState.playerState.water -= WATER_DECAY
+        if (cWeather.hourWeather.state == WeatherState.RAIN) {
+            if(gameState.playerState.water < 100.0f) gameState.playerState.water += 0.2
+        } else if (cWeather.hourWeather.state == WeatherState.HEAVY_RAIN) {
+            if(gameState.playerState.water < 100.0f)  gameState.playerState.water += 0.4
+        } else if (cWeather.hourWeather.state == WeatherState.LIGHT_RAIN) {
+            if(gameState.playerState.water < 100.0f)  gameState.playerState.water += 0.1
+        } else if (cWeather.hourWeather.state == WeatherState.THUNDERSTORM) {
+            if(gameState.playerState.water < 100.0f)  gameState.playerState.water += 0.8
         } else {
-            gameState.playerState.water = 0.0
+            if (gameState.playerState.water > 0.0) {
+                gameState.playerState.water -= WATER_DECAY
+            } else {
+                gameState.playerState.water = 0.0
+            }
         }
+        waterButton = gameState.playerState.water.toFloat()
     }
 
+    /**
+     * Add some Coins
+     */
     private fun gainCoins() {
         coins += 1
         gameState.playerState.coins = coins
@@ -256,11 +282,16 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 gameState.playerState.lastPosition = it
             },
             onFailure = {
+
+                // FHNW
                 position = GeoPosition(
                     latitude = 47.48124530209937,
                     longitude = 8.211087703634524,
                     altitude = 522.0
                 )
+
+                // GoldenGate Bridge
+                // position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
             },
             onPermissionDenied = {
                 val permissions = arrayOf(
@@ -271,15 +302,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             }
         )
 
-        //Todo check on real device
-        // FHNW
-        position = GeoPosition(latitude = 47.4809967, longitude = 8.2115859, altitude = 522.0)
-
-        // GoldenGate Bridge
-        //position = GeoPosition(latitude = 37.81913002995137, longitude = -122.47874183489822, altitude = 0.0)
-
         loadWeatherData(position.latitude, position.longitude)
-
         Log.d(
             TAG,
             "Data Looped runned, current weather: ${cWeather.hourWeather.state}, Day: ${dark}"
@@ -317,6 +340,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             calendar[Calendar.SECOND] = 0
             calendar[Calendar.MILLISECOND] = 0
 
+            val customWeather = WeatherState.THUNDERSTORM
+
             val weatherFacts = WeatherFacts(
                 temperature = currentWeather.getLong("temp").toFloat(),
                 apparentTemperature = currentWeather.getLong("feels_like").toInt(),
@@ -328,9 +353,8 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 visibility = currentWeather.getLong("visibility").toFloat(),
                 uvIndex = currentWeather.getLong("uvi").toInt(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
-                state = getWeatherState(currentWeatherWeather.getLong("id").toInt()),
-
-
+                //state = getWeatherState(currentWeatherWeather.getLong("id").toInt()),
+                state = customWeather
                 )
             cWeather = CurrentWeather(
                 time = calendar.time,

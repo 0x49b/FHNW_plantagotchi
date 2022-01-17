@@ -205,7 +205,7 @@ fun IndicatorBubble(model: PlantagotchiModel) {
         ) {
 
             StateBubble(
-                value = waterButton,
+                value = luxButton,
                 color = Color(0xFFFFEB57),
                 img = R.drawable.sunshine
             )
@@ -247,7 +247,6 @@ fun StateBubble(value: Float, color: Color, img: Int) {
                     color = Color(0xFF3F282F),
                     size = Size(width = 45.dp.toPx(), height = value - 50.0f),
                     topLeft = Offset(x=50.0f, y=50.0f)
-                    //blendMode = BlendMode.DstOut
                 )
             }
 
