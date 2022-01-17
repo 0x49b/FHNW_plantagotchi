@@ -335,7 +335,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
             calendar[Calendar.SECOND] = 0
             calendar[Calendar.MILLISECOND] = 0
 
-            //val customWeather = WeatherState.THUNDERSTORM
+            // val customWeather = WeatherState.THUNDERSTORM
 
             val weatherFacts = WeatherFacts(
                 temperature = currentWeather.getLong("temp").toFloat(),
@@ -349,7 +349,7 @@ class PlantagotchiModel(val activity: ComponentActivity) : AppCompatActivity(),
                 uvIndex = currentWeather.getLong("uvi").toInt(),
                 dewPoint = currentWeather.getLong("dew_point").toInt(),
                 state = getWeatherState(currentWeatherWeather.getLong("id").toInt()),
-                //state = customWeather
+                // state = customWeather
                 )
             cWeather = CurrentWeather(
                 time = calendar.time,

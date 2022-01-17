@@ -12,21 +12,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import coil.annotation.ExperimentalCoilApi
 import com.skydoves.landscapist.glide.GlideImage
 import fhnw.ws6c.R
-import fhnw.ws6c.plantagotchi.data.weather.WeatherState
 import fhnw.ws6c.plantagotchi.model.PlantagotchiModel
 import fhnw.ws6c.plantagotchi.ui.theme.PlantagotchiTheme
 import fhnw.ws6c.plantagotchi.ui.weatherui.DynamicWeatherSection
@@ -34,7 +28,6 @@ import kotlinx.coroutines.launch
 
 
 @ExperimentalMaterialApi
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun GameUI(model: PlantagotchiModel) {
     with(model) {
@@ -43,7 +36,6 @@ fun GameUI(model: PlantagotchiModel) {
             bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
         )
         val coroutineScope = rememberCoroutineScope()
-
 
         PlantagotchiTheme(darkTheme = dark) {
 
